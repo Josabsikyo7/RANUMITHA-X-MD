@@ -107,7 +107,7 @@ cmd({
 
     // Si aucun argument n'est fourni, afficher le mode actuel et l'usage
     if (!args[0]) {
-        return reply(`📌 Current mode: *${config.MODE}*\n\nUsage: .mode private OR .mode public`);
+        return reply(`📌 Current mode: *${config.MODE}*\n\nUsage: .mode *private/inbox/public*`);
     }
 
     const modeArg = args[0].toLowerCase();
