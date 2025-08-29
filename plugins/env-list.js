@@ -112,7 +112,7 @@ async (conn, mek, m, { from, quoted, reply, isOwner }) => {
         await conn.sendMessage(
             from,
             {
-                image: { url: "https://files.catbox.moe/yi665l.jpg" },
+                image: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/blob/main/images/Config%20img%20.jpg" },
                 caption: envSettings,
                 contextInfo: {
                     mentionedJid: [m.sender],
@@ -127,7 +127,7 @@ async (conn, mek, m, { from, quoted, reply, isOwner }) => {
         await conn.sendMessage(
             from,
             {
-                audio: { url: 'https://files.catbox.moe/crb1sx.mp3' },
+                audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3' },
                 mimetype: 'audio/mp4',
                 ptt: true
             },
