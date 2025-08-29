@@ -25,7 +25,7 @@ END:VCARD`
 };
 
 cmd({
-    pattern: "menu3",
+    pattern: "menu2",
     desc: "menu the bot",
     category: "menu2",
     react: "⚡",
@@ -66,7 +66,7 @@ async (conn, mek, m, { from, sender, pushname, reply }) => {
         await conn.sendMessage(
             from,
             {
-                image: { url: `https://files.catbox.moe/j2t4hm.jpg` },
+                image: { url: `https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_Red.jpg` },
                 caption: dec,
                 contextInfo: {
                     mentionedJid: [m.sender],
@@ -84,7 +84,7 @@ async (conn, mek, m, { from, sender, pushname, reply }) => {
 
         // Send cool voice note with context
         await conn.sendMessage(from, {
-            audio: { url: 'https://files.catbox.moe/a43ojv.mp3' },
+            audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/NO%20ERA%20AMOR%20(Super%20Slowed).mp3' },
             mimetype: 'audio/mp4',
             ptt: true,
             contextInfo: {
