@@ -84,7 +84,7 @@ cmd({
                 return await conn.sendMessage(
                     from,
                     {
-                        image: { url: config.MENU_IMAGE_URL || 'https://files.catbox.moe/cz2592.jpeg' },
+                        image: { url: config.MENU_IMAGE_URL || 'https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg' },
                         caption: menuCaption,
                         contextInfo: contextInfo
                     },
@@ -105,7 +105,7 @@ cmd({
             try {
                 await new Promise(resolve => setTimeout(resolve, 250)); // Small delay after image
                 await conn.sendMessage(from, {
-                    audio: { url: 'https://files.catbox.moe/b8cd8n.mp3' },
+                    audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3' },
                     mimetype: 'audio/mp4',
                     ptt: true,
                 }, { quoted: mek });
