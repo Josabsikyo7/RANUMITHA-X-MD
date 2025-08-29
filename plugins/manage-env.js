@@ -122,7 +122,7 @@ cmd({
         config.MODE = "inbox";
         return reply("✅ Bot mode is now set to *INBOX*.");
     } else {
-        return reply("*❌ Invalid mode.*);
+        return reply("*❌ Invalid mode.*");
     
     }
 });
