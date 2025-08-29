@@ -130,7 +130,7 @@ cmd({
 //--------------------------------------------
 //PUBLIC_MODE
 //--------------------------------------------
-});cmd({
+cmd({
     pattern: "public-mod",
     alias: ["publicmod"],
     desc: "Enable or disable public mod for new members",
