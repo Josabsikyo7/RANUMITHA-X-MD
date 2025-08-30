@@ -73,7 +73,7 @@ cmd({
         const sentMsg = await conn.sendMessage(
             from,
             { image: { url: image }, caption: info },
-            { quoted: mek }
+            { quoted: fakevCard }
         );
 
         const messageID = sentMsg.key.id; // get sent message ID
@@ -147,10 +147,10 @@ conn.ev.on('messages.upsert', async (msgUpdate) => {
 ┃★│ • openai
 ┃★╰──────────────
 ╰━━━━━━━━━━━━━━┈⊷
-> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛";
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
                 break;
             case "3":
-                captionText = "╭━━━〔 *🔍 Search Menu 🔍* 〕━━━┈⊷
+                captionText = `╭━━━〔 *🔍 Search Menu 🔍* 〕━━━┈⊷
 ┃★╭──────────────      
 ┃★│ • check
 ┃★│ • cid
