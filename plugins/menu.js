@@ -26,7 +26,7 @@ END:VCARD`
 
 cmd({
     pattern: "menu",
-    alise: ["getmenu","list","ranulist","ranumenu"],
+    alias: ["getmenu","list","ranulist","ranumenu"],
     desc: "Show interactive menu system",
     category: "menu",
     react: "📂",
@@ -109,47 +109,59 @@ conn.ev.on('messages.upsert', async (msgUpdate) => {
             react: { text: '✅', key: mekInfo.key }
         });
 
-        // send reply menu text
+        // menu image url එක
+        const menuImage = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg";
+
+        // send reply with image + caption
+        let captionText = "";
         switch (userReply) {
             case "1":
-                await conn.sendMessage(fromUser, { text: "🤵‍♂️ Owner Menu" }, { quoted: mekInfo });
+                captionText = "🤵‍♂️ Owner Menu";
                 break;
             case "2":
-                await conn.sendMessage(fromUser, { text: "🤖 AI Menu" }, { quoted: mekInfo });
+                captionText = "🤖 AI Menu";
                 break;
             case "3":
-                await conn.sendMessage(fromUser, { text: "🔍 Search Menu" }, { quoted: mekInfo });
+                captionText = "🔍 Search Menu";
                 break;
             case "4":
-                await conn.sendMessage(fromUser, { text: "📥 Download Menu" }, { quoted: mekInfo });
+                captionText = "📥 Download Menu";
                 break;
             case "5":
-                await conn.sendMessage(fromUser, { text: "😁 Fun Menu" }, { quoted: mekInfo });
+                captionText = "😁 Fun Menu";
                 break;
             case "6":
-                await conn.sendMessage(fromUser, { text: "📂 Main Menu" }, { quoted: mekInfo });
+                captionText = "📂 Main Menu";
                 break;
             case "7":
-                await conn.sendMessage(fromUser, { text: "🔄 Convert Menu" }, { quoted: mekInfo });
+                captionText = "🔄 Convert Menu";
                 break;
             case "8":
-                await conn.sendMessage(fromUser, { text: "📌 Other Menu" }, { quoted: mekInfo });
+                captionText = "📌 Other Menu";
                 break;
             case "9":
-                await conn.sendMessage(fromUser, { text: "🎨 Logo Menu" }, { quoted: mekInfo });
+                captionText = "🎨 Logo Menu";
                 break;
             case "10":
-                await conn.sendMessage(fromUser, { text: "🖼️ Imagine Menu" }, { quoted: mekInfo });
+                captionText = "🖼️ Imagine Menu";
                 break;
             case "11":
-                await conn.sendMessage(fromUser, { text: "👥 Group Menu" }, { quoted: mekInfo });
+                captionText = "👥 Group Menu";
                 break;
             case "12":
-                await conn.sendMessage(fromUser, { text: "⚙️ Setting Menu" }, { quoted: mekInfo });
+                captionText = "⚙️ Setting Menu";
                 break;
         }
+
+        await conn.sendMessage(fromUser, { 
+            image: { url: menuImage }, 
+            caption: captionText 
+        }, { quoted: mekInfo });
+
     } else {
-        await conn.sendMessage(fromUser, { text: "❌ Invalid choice! Reply with 1-12" }, { quoted: mekInfo });
+        await conn.sendMessage(fromUser, { 
+            text: "❌ Invalid choice! Reply with 1-12" 
+        }, { quoted: mekInfo });
     }
 });
     } catch (error) {
