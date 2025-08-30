@@ -10,18 +10,20 @@ cmd({
     filename: __filename
 }, async (conn, m, mek, { from, q, reply }) => {
     try {
-        
         const info = `Hello yaluwe`;
         const image = "https://files.catbox.moe/21liu3.jpg"; // define image url
+        const audio = "https://files.catbox.moe/21liu3.jpg"; // define image url
         const sentMsg = await conn.sendMessage(
             from,
-          
-              { image: { url: image },
-             caption: info }, 
-             { quoted: mek });
-             
-          await conn.sendMessage(from, {
-                    audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3' },
+            { image: { url: image }, caption: info },
+            { quoted: mek }
+        );
+
+// Function to send menu audio with timeout
+        const sendMenuAudio = async () => {
+            try {
+                await conn.sendMessage(from, {
+                    audio: { url: audio },
                     mimetype: 'audio/mp4',
                     ptt: true,
                 }, { quoted: mek });
@@ -29,7 +31,6 @@ cmd({
                 console.log('Audio send failed, continuing without it');
             }
         };
-   
 
         const messageID = sentMsg.key.id; // get sent message ID
 
