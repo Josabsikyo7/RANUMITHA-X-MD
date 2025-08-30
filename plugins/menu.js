@@ -34,7 +34,7 @@ cmd({
 }, async (conn, m, mek, { from, q, reply }) => {
     try {
 
-        const { url, title, image, timestamp, ago, views, author } = data.results[0];
+        const totalCommands = Object.keys(commands).length;
 
         let info = `Discretion eka`;
 
