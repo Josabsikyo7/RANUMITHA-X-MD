@@ -19,16 +19,8 @@ cmd({
         const sentMsg = await conn.sendMessage(
             from,
           
-          { audio: { url: audio }, 
-          { quoted: mek });
-          } catch (e) {
-                console.log('Audio send failed, continuing without it');
-            }
-        };
-
-          
-          { image: { url: image },
-           caption: info },  { quoted: mek });
+           { image: { url: image },
+           caption: info }, { audio: { url: audio },  { quoted: mek });
              
 
         const messageID = sentMsg.key.id; // get sent message ID
