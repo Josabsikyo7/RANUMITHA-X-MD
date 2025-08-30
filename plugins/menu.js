@@ -41,16 +41,6 @@ cmd({
 
  🎀 𝗪elcome to RANUMITHA-X-MD🎗️
 
-*╭──「 MENU 」*
-*│*🐼 *\`Bot\`*: *𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃*
-*│*👤 *\`User\`*: ${pushname}
-*│*👨‍💻 *\`Owner\`*: *ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ*
-*│*⏰ *\`Uptime\`*: ${runtime(process.uptime())}
-*│*⏳ *\`Ram\`*: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
-*│*🫟 *\`Version\`*: ${config.BOT_VERSION}
-*│*🪙 *\`Commands\`*: ${totalCommands}
-*│*🖊️ *\`Prefix\`*: ${config.PREFIX}
-╰───────────────●●►
 
 *1. │  🤵‍♂ -* Owner Menu
 *2. │  🤖 -* Ai Menu
@@ -99,15 +89,42 @@ cmd({
                 );
             }
         };
-                   
+
+        // Listen for user reply only once!
+        conn.ev.on('messages.upsert', async (messageUpdate) => { 
+            try {
+                const mekInfo = messageUpdate?.messages[0];
+                if (!mekInfo?.message) return;
+
+                const messageType = mekInfo?.message?.conversation || mekInfo?.message?.extendedTextMessage?.text;
+                const isReplyToSentMsg = mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+
+                if (!isReplyToSentMsg) return;
+
+                let userReply = messageType.trim();
+                let msg;
+                let type;
+                let response;
+                
+                if (userReply === "1.1") {
+                    msg = await conn.sendMessage(from, { text: "⏳ Processing..." }, { quoted: fakevCard });
+                    
                     
                 } else if (userReply === "1.2") {
-                    msg = await conn.sendMessage(from, { text: "⏳ okey..." }, { quoted: fakevCard });
-
+                    msg = await conn.sendMessage(from, { text: "⏳ Processing..." }, { quoted: fakevCard });
+                    
                     
                 } else { 
                     return await reply("❌ Invalid choice! Reply with 1.1 or 1.2.");
+                
 
+                
+
+            } catch (error) {
+                console.error(error);
+                await reply(`❌ *An error occurred while processing:* ${error.message || "Error!"}`);
+            }
+        });
 
     } catch (error) {
         console.error(error);
