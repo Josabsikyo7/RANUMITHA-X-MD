@@ -1,7 +1,6 @@
 const config = require('../config');
 const { cmd } = require('../command');
 
-
 cmd({
     pattern: "test",
     alias: ["test1"],
@@ -9,48 +8,52 @@ cmd({
     desc: "my cmd",
     category: "download",
     filename: __filename
-
 }, async (conn, m, mek, { from, q, reply }) => {
     try {
-
         const info = `Hello yaluwe`;
+        const image = "https://i.ibb.co/3rP7N5F/sample.jpg"; // define image url
 
-        const sentMsg = await conn.sendMessage(from, { image: { url: image }, caption: info }, { quoted: mek });
-        
+        const sentMsg = await conn.sendMessage(
+            from,
+            { image: { url: image }, caption: info },
+            { quoted: mek }
+        );
 
-        // Listen for user reply only once!
-        conn.ev.on('messages.upsert', async (messageUpdate) => { 
+        const messageID = sentMsg.key.id; // get sent message ID
+
+        // Listen for user reply
+        conn.ev.on('messages.upsert', async (messageUpdate) => {
             try {
                 const mekInfo = messageUpdate?.messages[0];
                 if (!mekInfo?.message) return;
 
-                const messageType = mekInfo?.message?.conversation || mekInfo?.message?.extendedTextMessage?.text;
-                const isReplyToSentMsg = mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+                const messageType =
+                    mekInfo?.message?.conversation ||
+                    mekInfo?.message?.extendedTextMessage?.text;
+
+                const isReplyToSentMsg =
+                    mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId === messageID;
 
                 if (!isReplyToSentMsg) return;
 
                 let userReply = messageType.trim();
-                let msg;
-                let type;
-                let response;
-                
+
                 if (userReply === "1") {
-                    msg = await conn.sendMessage(from, { text: "Hodai" }, { quoted: mek });
-                    ;
-                    
+                    await conn.sendMessage(from, { text: "Hodai" }, { quoted: mek });
                 } else if (userReply === "2") {
-                    msg = await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-                    
-                    
-                } else { 
+                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+                } else {
                     return await reply("❌ Invalid choice! Reply with 1 or 2");
-                
-
-                
-
+                }
+            } catch (error) {
+                console.error(error);
+                await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+                await reply(`❌ *An error occurred:* ${error.message || "Error!"}`);
+            }
+        });
     } catch (error) {
         console.error(error);
         await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-        await reply(`❌ *An error occurred:* ${error.message || "Error!"}`);
+        await reply(`❌ *Main error:* ${error.message || "Error!"}`);
     }
 });
