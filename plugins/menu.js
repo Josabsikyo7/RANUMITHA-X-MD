@@ -1,8 +1,7 @@
+const { cmd } = require('../command');
 const config = require('../config');
-const { cmd, commands } = require('../command');
-const { runtime } = require('../lib/functions');
-const axios = require('axios');
 const os = require("os");
+const { runtime } = require('../lib/functions');
 
 // Fake ChatGPT vCard
 const fakevCard = {
@@ -25,23 +24,69 @@ END:VCARD`
 };
 
 cmd({
-    pattern: "menu",
-    alise: ["getmenu","list","ranulist","ranumenu"],
-    desc: "Show interactive menu system",
-    category: "menu",
-    react: "📂",
+    pattern: "alive2",
+    alias: ["hyranu", "ranu", "status", "a"],
+    react: "🌝",
+    desc: "Check bot online or no.",
+    category: "main",
     filename: __filename
-}, async (conn, m, mek, { from, q, reply }) => {
+},
+async (robin, mek, m, {
+    from, quoted, reply, sender
+}) => {
     try {
+        await robin.sendPresenceUpdate('recording', from);
 
-        const totalCommands = Object.keys(commands).length;
+        // Voice Note
+        await robin.sendMessage(from, {
+            audio: {
+                url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Amor%20Na%20Praia%20(Slowed)%20edited.mp3"
+            },
+            mimetype: 'audio/mpeg',
+            ptt: true
+        }, { quoted: fakevCard });
 
-        let info = `Discretion eka`;
+        // Stylish Alive Caption
+       const status = `
+👋 Hello, I am alive now !!
 
-        const sentMsg = await conn.sendMessage(from, { image: { url: 'https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg' }, caption: info }, { quoted: fakevCard });
+╭─〔 💠 ALIVE STATUS 💠 〕─◉
+│
+│🐼 *Bot*: 𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃
+│🤵‍♂ *Owner*: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+│⏰ *Uptime*: ${runtime(process.uptime())}
+│⏳ *Ram*: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
+│🖊 *Prefix*: [ ${config.PREFIX} ]
+│🛠 *Mode*: [ ${config.MODE} ]
+│🖥 *Host*: ${os.hostname()}
+│🌀 *Version*: ${config.BOT_VERSION}
+╰─────────────────────────────⊷
+     
+      ☘ ʙᴏᴛ ᴍᴇɴᴜ  - .menu
+      🔥 ʙᴏᴛ ꜱᴘᴇᴇᴅ - .ping
+
+> 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶`;
+
+        // Send Image + Caption
+        await robin.sendMessage(from, {
+            image: {
+                url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg" // You can replace this with your own ALIVE_IMG URL
+            },
+            caption: status,
+            contextInfo: {
+                mentionedJid: [sender],
+                forwardingScore: 999,
+                isForwarded: false,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '',
+                    newsletterName: '',
+                    serverMessageId: 143
+                }
+            }
+        }, { quoted: mek });
         
         // Listen for user reply only once!
-        conn.ev.on('messages.upsert', async (messageUpdate) => { 
+        robin.ev.on('messages.upsert', async (messageUpdate) => { 
             try {
                 const mekInfo = messageUpdate?.messages[0];
                 if (!mekInfo?.message) return;
@@ -54,21 +99,20 @@ cmd({
                 let userReply = messageType.trim();
                 let msg;
                 let type;
-                let response;
                 
-                if (userReply === "1.1") {
-                    msg = await conn.sendMessage(from, { text: "⏳1 Processing..." }, { quoted: fakevCard });
-                                    
-                } else if (userReply === "1.2") {
-                    msg = await conn.sendMessage(from, { text: "⏳2 Processing..." }, { quoted: fakevCard });
+                if (userReply === "1") {
+                    msg = await robin.sendMessage(from, { text: "⏳ Processing..." }, { quoted: fakevCard });
+                    
+                    
+                } else if (userReply === "2") {
+                    msg = await robin.sendMessage(from, { text: "⏳ Processing..." }, { quoted: fakevCard });
                     
                     
                 } else { 
-                    return await reply("❌ Invalid choice! Reply with 1.1 or 1.2.");
+                    return await reply("❌ Invalid choice! Reply with 1 or 2.");
                 }
 
-                await conn.sendMessage(from, type, { quoted: mek });
-                await conn.sendMessage(from, { text: '✅ Media Upload Successful ✅', edit: msg.key });
+ 
 
             } catch (error) {
                 console.error(error);
@@ -76,10 +120,8 @@ cmd({
             }
         });
 
-    } catch (error) {
-        console.error(error);
-        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-        await reply(`❌ *An error occurred:* ${error.message || "Error!"}`);
+    } catch (e) {
+        console.log("Alive Error:", e);
+        reply(`⚠️ Error: ${e.message}`);
     }
 });
-                               
