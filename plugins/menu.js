@@ -11,8 +11,7 @@ cmd({
 }, async (conn, m, mek, { from, q, reply }) => {
     try {
         const info = `Hello yaluwe`;
-        const image = "https://i.ibb.co/3rP7N5F/sample.jpg"; // define image url
-
+        const image = "https://files.catbox.moe/21liu3.jpg"; // define image url
         const sentMsg = await conn.sendMessage(
             from,
             { image: { url: image }, caption: info },
