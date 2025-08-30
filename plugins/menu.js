@@ -12,7 +12,6 @@ cmd({
     try {
         const info = `Hello yaluwe`;
         const image = "https://files.catbox.moe/21liu3.jpg"; // define image url
-        const audio = "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3"; // define image url
         const sentMsg = await conn.sendMessage(
             from,
             { image: { url: image }, caption: info },
@@ -20,10 +19,11 @@ cmd({
         );
 
 // Function to send menu audio with timeout
-        const sendMenuAudio = async () => {
+        
+        const audio = async () => {
             try {
                 await conn.sendMessage(from, {
-                    audio: { url: audio },
+                    audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3" },
                     mimetype: 'audio/mp4',
                     ptt: true,
                 }, { quoted: mek });
