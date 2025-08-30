@@ -10,6 +10,15 @@ cmd({
     filename: __filename
 }, async (conn, m, mek, { from, q, reply }) => {
     try {
+                   
+              const audio: { url: 'https://files.catbox.moe/b8cd8n.mp3' },
+                    mimetype: 'audio/mp4',
+                    ptt: true,
+                }, { quoted: mek });
+            } catch (e) {
+                console.log('Audio send failed, continuing without it');
+            }
+        };
         const info = `Hello yaluwe`;
         const image = "https://files.catbox.moe/21liu3.jpg"; // define image url
         const sentMsg = await conn.sendMessage(
