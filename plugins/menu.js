@@ -25,119 +25,68 @@ END:VCARD`
 };
 
 cmd({
-    pattern: "menu",
-    alise: ["getmenu","list","ranulist","ranumenu"],
-    desc: "Show interactive menu system",
-    category: "menu",
-    react: "📂",
+    pattern: "alive",
+    alias: ["hyranu", "ranu", "status", "a"],
+    react: "🌝",
+    desc: "Check bot online or no.",
+    category: "main",
     filename: __filename
-}, async (conn, mek, m, { from, pushname, reply }) => {
+},
+async (robin, mek, m, {
+    from, quoted, reply, sender
+}) => {
     try {
+        await robin.sendPresenceUpdate('recording', from);
 
-        // Count total commands
-        const totalCommands = Object.keys(commands).length;
+        // Voice Note
+        await robin.sendMessage(from, {
+            audio: {
+                url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/Amor%20Na%20Praia%20(Slowed)%20edited.mp3"
+            },
+            mimetype: 'audio/mpeg',
+            ptt: true
+        }, { quoted: fakevCard });
+
+        // Stylish Alive Caption
+       const status = `
+👋 Hello, I am alive now !!
+
+╭─〔 💠 ALIVE STATUS 💠 〕─◉
+│
+│🐼 *Bot*: 𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃
+│🤵‍♂ *Owner*: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+│⏰ *Uptime*: ${runtime(process.uptime())}
+│⏳ *Ram*: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
+│🖊 *Prefix*: [ ${config.PREFIX} ]
+│🛠 *Mode*: [ ${config.MODE} ]
+│🖥 *Host*: ${os.hostname()}
+│🌀 *Version*: ${config.BOT_VERSION}
+╰─────────────────────────────⊷
+     
+      ☘ ʙᴏᴛ ᴍᴇɴᴜ  - .menu
+      🔥 ʙᴏᴛ ꜱᴘᴇᴇᴅ - .ping
+
+> 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶`;
+
+        // Send Image + Caption
+        await robin.sendMessage(from, {
+            image: {
+                url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg" // You can replace this with your own ALIVE_IMG URL
+            },
+            caption: status,
+            contextInfo: {
+                mentionedJid: [sender],
+                forwardingScore: 999,
+                isForwarded: false,
+                forwardedNewsletterMessageInfo: {
+                    newsletterJid: '',
+                    newsletterName: '',
+                    serverMessageId: 143
+                }
+            }
+        }, { quoted: mek });
+
         
-        const menuCaption = `👋 *𝘏𝘌𝘓𝘓𝘖𝘞* ${pushname} 
-
- 🎀 𝗪elcome to RANUMITHA-X-MD🎗️
-
-*╭──「 MENU 」*
-*│*🐼 *\`Bot\`*: *𝐑𝐀𝐍𝐔𝐌𝐈𝐓𝐇𝐀-𝐗-𝐌𝐃*
-*│*👤 *\`User\`*: ${pushname}
-*│*👨‍💻 *\`Owner\`*: *ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ*
-*│*⏰ *\`Uptime\`*: ${runtime(process.uptime())}
-*│*⏳ *\`Ram\`*: ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)}MB / ${(os.totalmem() / 1024 / 1024).toFixed(2)}MB
-*│*🫟 *\`Version\`*: ${config.BOT_VERSION}
-*│*🪙 *\`Commands\`*: ${totalCommands}
-*│*🖊️ *\`Prefix\`*: ${config.PREFIX}
-╰───────────────●●►
-
-*1. │  🤵‍♂ -* Owner Menu
-*2. │  🤖 -* Ai Menu
-*3. │  🔍 -* Search Menu
-*4. │  📥 -* Download Menu
-*5. │  😁 -* Fun Menu
-*6. │  📂 -* Main Menu
-*7. │  🔄 -* Convert Menu
-*8. │  📌 -* Other Menu
-*9. │  🎨 -* Logo Menu
-*10.│ 🖼️ -* Imagine Menu
-*11.│ 👥 -* Group Menu
-*12.│ ⚙️ -* Setting Menu
-
-> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
-
-        const contextInfo = {
-            mentionedJid: [m.sender],
-            forwardingScore: 999,
-            isForwarded: false,
-            forwardedNewsletterMessageInfo: {
-                newsletterJid: '120363401868132010@newsletter',
-                newsletterName: config.OWNER_NAME,
-                serverMessageId: 143
-            }
-        };
-
-        // Function to send menu image with timeout
-        const sendMenuImage = async () => {
-            try {
-                return await conn.sendMessage(
-                    from,
-                    {
-                        image: { url: config.MENU_IMAGE_URL || 'https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg' },
-                        caption: menuCaption,
-                        contextInfo: contextInfo
-                    },
-                    { quoted: fakevCard }
-                );
-            } catch (e) {
-                console.log('Image send failed, falling back to text');
-                return await conn.sendMessage(
-                    from,
-                    { text: menuCaption, contextInfo: contextInfo },
-                    { quoted: mek }
-                );
-            }
-        };
-
-        // Function to send menu audio with timeout
-        const sendMenuAudio = async () => {
-            try {
-                await new Promise(resolve => setTimeout(resolve, 250)); // Small delay after image
-                await conn.sendMessage(from, {
-                    audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3' },
-                    mimetype: 'audio/mp4',
-                    ptt: true,
-                }, { quoted: mek });
-            } catch (e) {
-                console.log('Audio send failed, continuing without it');
-            }
-        };
-
-        // Send image first, then audio sequentially
-        let sentMsg;
-        try {
-            // Send image with 10s timeout
-            sentMsg = await Promise.race([
-                sendMenuImage(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Image send timeout')), 2500))
-            ]);
-            
-            // Then send audio with 1s delay and 8s timeout
-            await Promise.race([
-                sendMenuAudio(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Audio send timeout')), 2000))
-            ]);
-        } catch (e) {
-            console.log('Menu send error:', e);
-            if (!sentMsg) {
-                sentMsg = await conn.sendMessage(
-                    from,
-                    { text: menuCaption, contextInfo: contextInfo },
-                    { quoted: mek }
-                );
-            }
-        }
         
         const messageID = sentMsg.key.id;
 
@@ -496,11 +445,11 @@ cmd({
         };
 
         // Add listener
-        conn.ev.on("messages.upsert", handler);
+        robin.ev.on("messages.upsert", handler);
 
         // Remove listener after 5 minutes
         setTimeout(() => {
-            conn.ev.off("messages.upsert", handler);
+            robin.ev.off("messages.upsert", handler);
         }, 300000);
 
     } catch (e) {
