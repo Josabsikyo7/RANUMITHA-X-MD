@@ -26,7 +26,7 @@ END:VCARD`
 
 cmd({
     pattern: "menu",
-    alise: ["getmenu","list","ranulist","ranumenu"],
+    alias: ["getmenu","list","ranulist","ranumenu"],
     desc: "Show interactive menu system",
     category: "menu",
     react: "📂",
@@ -104,28 +104,76 @@ cmd({
 
                 if (userReply === "1") {
                     await conn.sendMessage(from, { text: "Hodai" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });
                 } else if (userReply === "2") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });
                 } else if (userReply === "3") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });
                 } else if (userReply === "4") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });                    
                 } else if (userReply === "5") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });                    
                 } else if (userReply === "6") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });                    
                 } else if (userReply === "7") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });                    
                 } else if (userReply === "8") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });                    
                 } else if (userReply === "9") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });                    
                 } else if (userReply === "10") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });                    
                 } else if (userReply === "11") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });                    
                 } else if (userReply === "12") {
                     await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
+// ✅ React to the sent message
+                    await conn.sendMessage(from, {
+                        react: { text: "✅", key: msg.key }
+                    });                    
                 } else {
                     return await reply("❌ Invalid choice! Reply with 1 or 12");
                 }
