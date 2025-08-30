@@ -26,7 +26,7 @@ END:VCARD`
 
 cmd({
     pattern: "menu",
-    alias: ["getmenu","list","ranulist","ranumenu"],
+    alise: ["getmenu","list","ranulist","ranumenu"],
     desc: "Show interactive menu system",
     category: "menu",
     react: "📂",
@@ -86,103 +86,72 @@ cmd({
         );
 
         // Listen for user reply
-        conn.ev.on('messages.upsert', async (messageUpdate) => {
-            try {
-                const mekInfo = messageUpdate?.messages[0];
-                if (!mekInfo?.message) return;
+conn.ev.on('messages.upsert', async (msgUpdate) => {
+    const mekInfo = msgUpdate?.messages[0];
+    if (!mekInfo?.message) return;
 
-                const messageType =
-                    mekInfo?.message?.conversation ||
-                    mekInfo?.message?.extendedTextMessage?.text;
+    const fromUser = mekInfo.key.remoteJid;
+    const textMsg =
+        mekInfo.message.conversation ||
+        mekInfo.message.extendedTextMessage?.text;
 
-                const isReplyToSentMsg =
-                    mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+    const quotedId =
+        mekInfo.message?.extendedTextMessage?.contextInfo?.stanzaId;
 
-                if (!isReplyToSentMsg) return;
+    // check user replied to menu message
+    if (quotedId !== messageID) return;
 
-                let userReply = messageType.trim();
+    let userReply = textMsg?.trim();
 
-                if (userReply === "1") {
-                    await conn.sendMessage(from, { text: "Hodai" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });
-                } else if (userReply === "2") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });
-                } else if (userReply === "3") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });
-                } else if (userReply === "4") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });                    
-                } else if (userReply === "5") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });                    
-                } else if (userReply === "6") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });                    
-                } else if (userReply === "7") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });                    
-                } else if (userReply === "8") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });                    
-                } else if (userReply === "9") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });                    
-                } else if (userReply === "10") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });                    
-                } else if (userReply === "11") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });                    
-                } else if (userReply === "12") {
-                    await conn.sendMessage(from, { text: "aulak na" }, { quoted: mek });
-// ✅ React to the sent message
-                    await conn.sendMessage(from, {
-                        react: { text: "✅", key: msg.key }
-                    });                    
-                } else {
-                    return await reply("❌ Invalid choice! Reply with 1 or 12");
-                }
-            } catch (error) {
-                console.error(error);
-                await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
-                await reply(`❌ *An error occurred:* ${error.message || "Error!"}`);
-            }
+    if (/^(1|2|3|4|5|6|7|8|9|10|11|12)$/.test(userReply)) {
+        // ✅ react
+        await conn.sendMessage(fromUser, {
+            react: { text: '✅', key: mekInfo.key }
         });
+
+        // send reply menu text
+        switch (userReply) {
+            case "1":
+                await conn.sendMessage(fromUser, { text: "🤵‍♂️ Owner Menu" }, { quoted: mekInfo });
+                break;
+            case "2":
+                await conn.sendMessage(fromUser, { text: "🤖 AI Menu" }, { quoted: mekInfo });
+                break;
+            case "3":
+                await conn.sendMessage(fromUser, { text: "🔍 Search Menu" }, { quoted: mekInfo });
+                break;
+            case "4":
+                await conn.sendMessage(fromUser, { text: "📥 Download Menu" }, { quoted: mekInfo });
+                break;
+            case "5":
+                await conn.sendMessage(fromUser, { text: "😁 Fun Menu" }, { quoted: mekInfo });
+                break;
+            case "6":
+                await conn.sendMessage(fromUser, { text: "📂 Main Menu" }, { quoted: mekInfo });
+                break;
+            case "7":
+                await conn.sendMessage(fromUser, { text: "🔄 Convert Menu" }, { quoted: mekInfo });
+                break;
+            case "8":
+                await conn.sendMessage(fromUser, { text: "📌 Other Menu" }, { quoted: mekInfo });
+                break;
+            case "9":
+                await conn.sendMessage(fromUser, { text: "🎨 Logo Menu" }, { quoted: mekInfo });
+                break;
+            case "10":
+                await conn.sendMessage(fromUser, { text: "🖼️ Imagine Menu" }, { quoted: mekInfo });
+                break;
+            case "11":
+                await conn.sendMessage(fromUser, { text: "👥 Group Menu" }, { quoted: mekInfo });
+                break;
+            case "12":
+                await conn.sendMessage(fromUser, { text: "⚙️ Setting Menu" }, { quoted: mekInfo });
+                break;
+        }
+    } else {
+        await conn.sendMessage(fromUser, { text: "❌ Invalid choice! Reply with 1-12" }, { quoted: mekInfo });
+    }
+});
     } catch (error) {
         console.error(error);
         await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
