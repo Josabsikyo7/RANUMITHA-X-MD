@@ -12,7 +12,7 @@ cmd({
     try {
         const info = `Hello yaluwe`;
         const image = "https://files.catbox.moe/21liu3.jpg"; // define image url
-        const audio = "https://files.catbox.moe/21liu3.jpg"; // define image url
+        const audio = "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3"; // define image url
         const sentMsg = await conn.sendMessage(
             from,
             { image: { url: image }, caption: info },
