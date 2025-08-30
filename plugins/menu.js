@@ -31,65 +31,15 @@ cmd({
     category: "menu",
     react: "📂",
     filename: __filename
-}, async (conn, mek, m, { from, pushname, reply }) => {
+}, async (conn, m, mek, { from, q, reply }) => {
     try {
 
-        // Count total commands
-        const totalCommands = Object.keys(commands).length;
+        const { url, title, image, timestamp, ago, views, author } = data.results[0];
+
+        let info = `Discretion eka`;
+
+        const sentMsg = await conn.sendMessage(from, { image: { url: 'https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg' }, caption: info }, { quoted: fakevCard });
         
-        const menuCaption = `👋 *𝘏𝘌𝘓𝘓𝘖𝘞* ${pushname} 
-
- 🎀 𝗪elcome to RANUMITHA-X-MD🎗️
-
-
-*1. │  🤵‍♂ -* Owner Menu
-*2. │  🤖 -* Ai Menu
-*3. │  🔍 -* Search Menu
-*4. │  📥 -* Download Menu
-*5. │  😁 -* Fun Menu
-*6. │  📂 -* Main Menu
-*7. │  🔄 -* Convert Menu
-*8. │  📌 -* Other Menu
-*9. │  🎨 -* Logo Menu
-*10.│ 🖼️ -* Imagine Menu
-*11.│ 👥 -* Group Menu
-*12.│ ⚙️ -* Setting Menu
-
-> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
-
-        const contextInfo = {
-            mentionedJid: [m.sender],
-            forwardingScore: 999,
-            isForwarded: false,
-            forwardedNewsletterMessageInfo: {
-                newsletterJid: '',
-                newsletterName: '',
-                serverMessageId: 143
-            }
-        };
-
-        // Function to send menu image with timeout
-        const sendMenuImage = async () => {
-            try {
-                return await conn.sendMessage(
-                    from,
-                    {
-                        image: { url: config.MENU_IMAGE_URL || 'https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg' },
-                        caption: menuCaption,
-                        contextInfo: contextInfo
-                    },
-                    { quoted: fakevCard }
-                );
-            } catch (e) {
-                console.log('Image send failed, falling back to text');
-                return await conn.sendMessage(
-                    from,
-                    { text: menuCaption, contextInfo: contextInfo },
-                    { quoted: mek }
-                );
-            }
-        };
-
         // Listen for user reply only once!
         conn.ev.on('messages.upsert', async (messageUpdate) => { 
             try {
@@ -107,18 +57,18 @@ cmd({
                 let response;
                 
                 if (userReply === "1.1") {
-                    msg = await conn.sendMessage(from, { text: "⏳ Processing..." }, { quoted: fakevCard });
-                    
-                    
+                    msg = await conn.sendMessage(from, { text: "⏳1 Processing..." }, { quoted: fakevCard });
+                                    
                 } else if (userReply === "1.2") {
-                    msg = await conn.sendMessage(from, { text: "⏳ Processing..." }, { quoted: fakevCard });
+                    msg = await conn.sendMessage(from, { text: "⏳2 Processing..." }, { quoted: fakevCard });
                     
                     
                 } else { 
                     return await reply("❌ Invalid choice! Reply with 1.1 or 1.2.");
-                
+                }
 
-                
+                await conn.sendMessage(from, type, { quoted: mek });
+                await conn.sendMessage(from, { text: '✅ Media Upload Successful ✅', edit: msg.key });
 
             } catch (error) {
                 console.error(error);
