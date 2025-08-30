@@ -10,18 +10,26 @@ cmd({
     filename: __filename
 }, async (conn, m, mek, { from, q, reply }) => {
     try {
-        const audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3' },
-                    mimetype: 'audio/mp4',
-                    ptt: true,
-                },
+        
         const info = `Hello yaluwe`;
         const image = "https://files.catbox.moe/21liu3.jpg"; // define image url
         const sentMsg = await conn.sendMessage(
             from,
           
-           { image: { url: image },
-           caption: info }, { audio: { url: audio },  { quoted: mek });
+              { image: { url: image },
+             caption: info }, 
+             { quoted: mek });
              
+          await conn.sendMessage(from, {
+                    audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3' },
+                    mimetype: 'audio/mp4',
+                    ptt: true,
+                }, { quoted: mek });
+            } catch (e) {
+                console.log('Audio send failed, continuing without it');
+            }
+        };
+   
 
         const messageID = sentMsg.key.id; // get sent message ID
 
