@@ -11,28 +11,24 @@ cmd({
 }, async (conn, m, mek, { from, q, reply }) => {
     try {
         const info = `Hello yaluwe`;
-        const image = "https://files.catbox.moe/21liu3.jpg"; // define image url
+        const image = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg"; // define image url
+        const audioUrl = "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3"; // audio url / local file
+
+        // Send image
         const sentMsg = await conn.sendMessage(
             from,
             { image: { url: image }, caption: info },
             { quoted: mek }
         );
 
-// Function to send menu audio with timeout
-        
-        const audio = async () => {
-            try {
-                await conn.sendMessage(from, {
-                    audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3" },
-                    mimetype: 'audio/mp4',
-                    ptt: true,
-                }, { quoted: mek });
-            } catch (e) {
-                console.log('Audio send failed, continuing without it');
-            }
-        };
-
         const messageID = sentMsg.key.id; // get sent message ID
+
+        // Send audio (voice note style)
+        await conn.sendMessage(
+            from,
+            { audio: { url: audioUrl }, mimetype: 'audio/mp4', ptt: true },
+            { quoted: mek }
+        );
 
         // Listen for user reply
         conn.ev.on('messages.upsert', async (messageUpdate) => {
