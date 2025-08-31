@@ -10,14 +10,12 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // Non-owner trying to open the menu
+        // Non-owner trying to open menu
         if (!isOwner) {
-            // React ❌ safely
             await conn.sendMessage(from, { react: { text: "❌", key: m?.key || {} } });
             return reply("❌ Only Owner can access env settings!", { quoted: m || undefined });
         }
 
-        // Menu text
         let envSettings = `
 ╭━━━ 『 ${config.BOT_NAME} CONFIG 』━━━╮
 │
@@ -44,7 +42,7 @@ cmd({
         // Send menu voice
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
-            mimetype: 'audio/mpeg',
+            mimetype: 'audio/mp4',
             ptt: true
         }, { quoted: m || undefined });
 
@@ -55,7 +53,7 @@ cmd({
 
             const context = msg.message.extendedTextMessage.contextInfo;
 
-            // Only process replies to the menu message
+            // Only process replies to the menu
             if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
             const selectedOption = msg.message.extendedTextMessage.text.trim();
@@ -70,7 +68,7 @@ cmd({
             // Owner reply → react ✅ first
             await conn.sendMessage(from, { react: { text: "✅", key: msg.key || {} } });
 
-            // Send the response
+            // Send corresponding response or react ❌ if invalid
             switch (selectedOption) {
                 case '1.1': await reply("✅ Public Mode enabled"); break;
                 case '1.2': await reply("✅ Private Mode enabled"); break;
@@ -80,14 +78,12 @@ cmd({
                 case '2.2': await reply("✅ Auto Voice OFF"); break;
                 case '7.1': await reply("🔄 Restarting Bot..."); break;
                 case '7.2': await reply("⏹️ Shutting down Bot..."); break;
-                default: 
-    // React ❌ to the message
-    await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
-    // Send invalid option message
-    await reply("❌ Invalid option, please select correctly."); 
-               }
+                default:
+                    await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
+                    await reply("❌ Invalid option, please select correctly.");
+            }
 
-            // Remove listener after processing
+            // Remove listener after first reply
             conn.ev.off('messages.upsert', handler);
         };
 
@@ -95,6 +91,7 @@ cmd({
 
     } catch (error) {
         console.error('Env command error:', error);
+        await conn.sendMessage(from, { react: { text: "❌", key: m?.key || {} } });
         reply(`❌ Error: ${error.message}`, { quoted: m || undefined });
     }
 });
