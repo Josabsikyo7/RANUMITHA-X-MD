@@ -1,43 +1,28 @@
 const config = require('../config');
 const { cmd } = require('../command');
 
-// Function to check boolean envs
 function isEnabled(value) {
     return value && value.toString().toLowerCase() === "true";
 }
 
-// Convert owner number into proper JID
 function getOwnerJid() {
     return config.OWNER_NUMBER.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
-}
-
-// Allowed numbers (owner + first installer)
-const allowedDynamic = new Set();
-
-// Helper to add installer to allowedDynamic
-function addInstaller(jid) {
-    if (!allowedDynamic.has(jid)) allowedDynamic.add(jid);
 }
 
 cmd({
     pattern: "env",
     alias: ["config","settings","setting"],
-    desc: "Show bot configuration (Owner/Installer Access)",
+    desc: "Show bot configuration (Owner Only Reply)",
     category: "system",
     react: "⚙️",
     filename: __filename
 }, async (conn, mek, m, { from, reply, isCreator }) => {
     try {
         const senderJid = mek.sender;
+        const ownerJid = getOwnerJid();
 
-        // Add owner + first installer
-        addInstaller(getOwnerJid());
-        addInstaller(senderJid); // first installer can access
-
-        if (!allowedDynamic.has(senderJid)) {
-            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-            return reply("🚫 *Only Owner/Installer Can Access!*");
-        }
+        // Menu send karana kenata vitharai access
+        const allowedMenuSender = senderJid;
 
         let envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 ├─❏ *🔖 BOT INFO*
@@ -78,11 +63,15 @@ cmd({
 
                 if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
-                if (!allowedDynamic.has(replySender)) {
+                // Check menu sender access
+                if (replySender !== allowedMenuSender) {
                     await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
-                    await conn.sendMessage(from, { text: "*🚫 Only Owner/Installer can access settings!*" }, { quoted: msg });
+                    await conn.sendMessage(from, { text: "*🚫 Only menu sender can interact!*" }, { quoted: msg });
                     return;
                 }
+
+                // Check owner for full access
+                const isOwner = replySender === ownerJid;
 
                 if (!allowedOptions.includes(selectedOption)) {
                     await conn.sendMessage(from, { react: { text: "⚠️", key: msg.key } });
@@ -90,8 +79,16 @@ cmd({
                     return;
                 }
 
+                // Only owner can change settings
+                if (!isOwner) {
+                    await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
+                    await conn.sendMessage(from, { text: "*🚫 Only Owner can change settings!*", quoted: msg });
+                    return;
+                }
+
                 await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
 
+                // Handle options
                 switch(selectedOption){
                     case '1.1': await reply("✅ Public Mode enabled"); break;
                     case '1.2': await reply("✅ Private Mode enabled"); break;
@@ -140,7 +137,7 @@ cmd({
                 }
 
             } catch(err){
-                if(allowedDynamic.has(msgUpdate.messages[0].key.participant)) {
+                if(msgUpdate.messages[0].key.participant === ownerJid) {
                     await reply(`❌ Env command error: ${err.message}`);
                 }
                 console.error('Env command error:', err);
