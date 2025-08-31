@@ -12,7 +12,6 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // Only owner can open menu
         if (!isOwner) return reply("❌ Only Owner can access env settings!");
 
         // Menu text
@@ -46,30 +45,29 @@ cmd({
             ptt: true
         }, { quoted: mek });
 
-        // Single-use reply listener
+        // Single-use listener for replies
         const handler = async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
             if (!msg.message || !msg.message.extendedTextMessage) return;
 
             const replySender = msg.key.participant || msg.key.remoteJid;
+            const selectedOption = msg.message.extendedTextMessage.text.trim();
 
-            // Check if reply is to the menu
+            // Check if the message is a reply to the menu
             const context = msg.message.extendedTextMessage.contextInfo;
             if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
-            const selectedOption = msg.message.extendedTextMessage.text.trim();
-
-            // Non-owner trying to select a number
+            // Non-owner reply
             if (!isOwner) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
-                await conn.sendMessage(from, { text: "❌ Owner nemei!" }, { quoted: msg });
+                await conn.sendMessage(from, { text: "❌ Only Owner can access env settings!" }, { quoted: msg });
                 return;
             }
 
-            // Owner: first react ✅
+            // Owner reply → react ✅ first
             await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
 
-            // Then send the confirmation message
+            // Send corresponding response
             switch (selectedOption) {
                 case '1.1': await reply("✅ Public Mode enabled"); break;
                 case '1.2': await reply("✅ Private Mode enabled"); break;
@@ -79,10 +77,10 @@ cmd({
                 case '2.2': await reply("✅ Auto Voice OFF"); break;
                 case '7.1': await reply("🔄 Restarting Bot..."); break;
                 case '7.2': await reply("⏹️ Shutting down Bot..."); break;
-                default: await reply("❌ Invalid option, please select correctly.");
+                default: await reply("❌ Invalid option, please select correctly."); 
             }
 
-            // Remove listener after processing
+            // Remove listener after first reply
             conn.ev.off('messages.upsert', handler);
         };
 
