@@ -1,43 +1,100 @@
 const config = require('../config');
-const { cmd } = require('../command');
+const { cmd, commands } = require('../command');
+const { runtime } = require('../lib/functions');
+const axios = require('axios');
+const os = require("os")
+
+// Reusable function to check boolean envs
+function isEnabled(value) {
+    return value && value.toString().toLowerCase() === "true";
+}
+
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+END:VCARD`
+        }
+    }
+};
 
 cmd({
-    pattern: "envsettings",
-    alias: ["env", "config"],
-    desc: "Show bot configuration options",
-    category: "owner",
+    pattern: "env",
+    alias: ["config", "settings", "setting"],
+    desc: "Show all bot configuration variables (Owner Only)",
+    category: "system",
     react: "⚙️",
     filename: __filename
-}, async (conn, mek, m, { from, reply, isOwner }) => {
+}, 
+async (conn, mek, m, { from, reply, isOwner }) => {
     try {
         // Non-owner access
         if (!isOwner) {
             // React ❌
             await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-            return reply("❌ Only Owner can access env settings!");
+            return reply("🚫 *Only Owner Can Access!*");
         }
 
         // Menu text for owner
-        let envSettings = `
-╭━━━ 『 ${config.BOT_NAME} CONFIG 』━━━╮
+        let envSettings = `╭───『 *${config.BOT_NAME} CONFIG* 』───❏
 │
-│ 1.1  Public Mode
-│ 1.2  Private Mode
-│ 1.3  Group Mode
-│ 1.4  Inbox Mode
+├─❏ *🤖 BOT INFO*
+│  ├─∘ *Name:* ${config.BOT_NAME}
+│  ├─∘ *Prefix:* ${config.PREFIX}
+│  ├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+│  ├─∘ *Number:* ${config.OWNER_NUMBER}
+│  ├─∘ *Version:* ${config.BOT_VERSION}
+│  └─∘ *Mode:* ${config.MODE.toUpperCase()}
 │
-│ 2.1  Auto Voice ON
-│ 2.2  Auto Voice OFF
+├─❏ *⚙️ CORE SETTINGS*
+│  ├─∘ *Public Mode:* ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}
+│  ├─∘ *Always Online:* ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}
+│  ├─∘ *Read Msgs:* ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}
+│  └─∘ *Read Cmds:* ${isEnabled(config.READ_CMD) ? "✅" : "❌"}
 │
-│ 7.1  Restart Bot
-│ 7.2  Shutdown Bot
-╰━━━━━━━━━━━━━━━━━━╯`;
+├─❏ *🔌 AUTOMATION*
+│  ├─∘ *Auto Reply:* ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}
+│  ├─∘ *Auto React:* ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}
+│  ├─∘ *Custom React:* ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}
+│  ├─∘ *React Emojis:* ${config.CUSTOM_REACT_EMOJIS}
+│  ├─∘ *Auto Sticker:* ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}
+│  └─∘ *Auto Voice:* ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}
+│
+├─❏ *📢 STATUS SETTINGS*
+│  ├─∘ *Status Seen:* ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}
+│  └─∘ *Status React:* ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}
+│
+├─❏ *🛡️ SECURITY*
+│  └─∘ *Anti-VV:* ${isEnabled(config.ANTI_VV) ? "✅" : "❌"} 
+│
+├─❏ *🎨 MEDIA*
+│  ├─∘ *Alive Msg:* ${config.ALIVE_MSG}
+│  └─∘ *Sticker Pack:* ${config.STICKER_NAME}
+│
+├─❏ *⏳ MISC*
+│  ├─∘ *Auto Typing:* ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}
+│  ├─∘ *Auto Record:* ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}
+│  ├─∘ *Anti-Del Path:* ${config.ANTI_DEL_PATH}
+│  └─∘ *Dev Number:* ${config.DEV}
+│
+╰──────❏`;
 
         // Send menu image
         const menuMsg = await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
-        }, { quoted: mek });
+        }, { quoted: fakevCard });
 
         // Send menu voice
         await conn.sendMessage(from, {
@@ -62,7 +119,7 @@ cmd({
             const senderIsOwner = replySender === conn.user.id || isOwner;
             if (!senderIsOwner) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
-                await conn.sendMessage(from, { text: "❌ Only Owner can access env settings!" }, { quoted: msg });
+                await conn.sendMessage(from, { text: "🚫 *Only Owner Can Access!*" }, { quoted: msg });
                 return;
             }
 
