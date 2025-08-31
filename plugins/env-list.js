@@ -100,27 +100,27 @@ async (conn, mek, m, { from, quoted, reply, isOwner }) => {
                             break;
                         case '2.1':     
                             reply(".update AUTO_VOICE:true");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         case '2.2':     
                             reply(".update AUTO_VOICE:false");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         case '3.1':    
                             reply(".update AUTO_READ_STATUS:true");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         case '3.2':    
                             reply(".update AUTO_READ_STATUS:false");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         case '4.1': 
                             reply(".update AUTO_BIO:true");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         case '4.2': 
                             reply(".update AUTO_BIO:false");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         case '5.1': 
                             reply(".startnews");
@@ -130,19 +130,19 @@ async (conn, mek, m, { from, quoted, reply, isOwner }) => {
                             break;
                         case '6.1':      
                             reply(".update AUTO_TYPING:true");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         case '6.2':   
                             reply(".update AUTO_TYPING:false");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         case '7.1': 
                             reply(".update AUTO_READ_CMD:true");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         case '7.2':   
                             reply(".update AUTO_READ_CMD:false");
-                            reply(".restart");
+                            reply("ok ✅");
                             break;
                         default:
                             reply("Invalid option. Please select a valid option 🔴");
