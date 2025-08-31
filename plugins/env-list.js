@@ -80,8 +80,11 @@ cmd({
                 case '2.2': await reply("✅ Auto Voice OFF"); break;
                 case '7.1': await reply("🔄 Restarting Bot..."); break;
                 case '7.2': await reply("⏹️ Shutting down Bot..."); break;
-                default: await reply("❌ Invalid option, please select correctly.");
-            }
+                default: 
+    // React ❌ to the message
+    await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
+    // Send invalid option message
+    await reply("❌ Invalid option, please select correctly.");
 
             // Remove listener after processing
             conn.ev.off('messages.upsert', handler);
