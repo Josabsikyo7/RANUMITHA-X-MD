@@ -12,10 +12,12 @@ cmd({
     try {
         // Non-owner trying to open menu
         if (!isOwner) {
-            await conn.sendMessage(from, { react: { text: "❌", key: m?.key || {} } });
+            const reactKey = m?.key;
+            if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
             return reply("❌ Only Owner can access env settings!", { quoted: m || undefined });
         }
 
+        // Menu text
         let envSettings = `
 ╭━━━ 『 ${config.BOT_NAME} CONFIG 』━━━╮
 │
@@ -34,7 +36,7 @@ cmd({
 `;
 
         // Send menu image
-        await conn.sendMessage(from, {
+        const menuMsg = await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: m || undefined });
@@ -51,25 +53,29 @@ cmd({
             const msg = msgUpdate.messages[0];
             if (!msg.message) return;
 
-            // Get text message
             let text = "";
-            if (msg.message.extendedTextMessage) {
-                text = msg.message.extendedTextMessage.text.trim();
-            } else if (msg.message.conversation) {
-                text = msg.message.conversation.trim();
-            } else return;
+            if (msg.message.extendedTextMessage) text = msg.message.extendedTextMessage.text.trim();
+            else if (msg.message.conversation) text = msg.message.conversation.trim();
+            else return;
 
-            // Non-owner sends any number
+            const reactKey = msg?.key || menuMsg?.key;
+
+            // Non-owner sends number
             if (!isOwner) {
                 const numbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
                 if (numbers.includes(text)) {
-                    await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
+                    if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
                     await conn.sendMessage(from, { text: "❌ Owner nemei!", quoted: msg });
                 }
                 return;
             }
 
-            // Owner sends a number
+            // Owner sends a number → react ✅
+            if (["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"].includes(text)) {
+                if (reactKey) await conn.sendMessage(from, { react: { text: "✅", key: reactKey } });
+            }
+
+            // Send the response
             switch (text) {
                 case '1.1': await reply("✅ Public Mode enabled"); break;
                 case '1.2': await reply("✅ Private Mode enabled"); break;
@@ -80,9 +86,8 @@ cmd({
                 case '7.1': await reply("🔄 Restarting Bot..."); break;
                 case '7.2': await reply("⏹️ Shutting down Bot..."); break;
                 default:
-                    // React ❌ if owner typed invalid number
-                    if (text.match(/^\d\.\d$/)) { // matches number like 1.1
-                        await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
+                    if (text.match(/^\d\.\d$/)) {
+                        if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
                         await reply("❌ Invalid option, please select correctly.");
                     }
             }
@@ -92,7 +97,8 @@ cmd({
 
     } catch (error) {
         console.error('Env command error:', error);
-        await conn.sendMessage(from, { react: { text: "❌", key: m?.key || {} } });
+        const reactKey = m?.key;
+        if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
         reply(`❌ Error: ${error.message}`, { quoted: m || undefined });
     }
 });
