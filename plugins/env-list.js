@@ -37,7 +37,7 @@ cmd({
     react: "⚙️",
     filename: __filename
 }, 
-async (conn, mek, m, { from, reply, isOwner }) => {
+async (conn, mek, m, { from, quoted,reply, isOwner }) => {
     try {
         // Non-owner access
         if (!isOwner) {
