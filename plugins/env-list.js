@@ -10,7 +10,7 @@ function isEnabled(value) {
 }
 
 cmd({
-    pattern: "envsettings",
+    pattern: "env",
     alias: ["config", "settings", "setting"],
     desc: "Show bot configuration options",
     category: "owner",
@@ -18,11 +18,13 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // 🛡️ Only owner can run command
-        if (!isOwner) return reply("❌ Only Owner can access env settings!");
+        // 🛡️ Only Owner
+        if (!isOwner) {
+            return reply("❌ Only the *Owner* can access this command!");
+        }
 
-        // env menu text
-        let envSettings = `
+        // menu text
+        let menu = `
 ╭━━━ 『 ${config.BOT_NAME} CONFIG 』━━━╮
 │
 │ 1.1  Public Mode
@@ -39,66 +41,77 @@ cmd({
 ╰━━━━━━━━━━━━━━━━━━╯
 `;
 
-        // send image + caption
-        const vv = await conn.sendMessage(from, {
-            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
-            caption: envSettings
+        // 🖼️ send image with menu text
+        vv = await conn.sendMessage(from, {
+            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },  // put your env menu image path here
+            caption: menu
         }, { quoted: mek });
 
-        // send voice note
+        // 🎤 send voice note
         await conn.sendMessage(from, {
-            audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
+            audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },  // put your env voice path here
             mimetype: 'audio/mp4',
             ptt: true
         }, { quoted: mek });
 
-        // reply handling (owner only)
+        // listen for replies
         conn.ev.on('messages.upsert', async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
             if (!msg.message || !msg.message.extendedTextMessage) return;
 
             const selectedOption = msg.message.extendedTextMessage.text.trim();
 
+            // reply check only if response is to env menu
             if (msg.message.extendedTextMessage.contextInfo &&
                 msg.message.extendedTextMessage.contextInfo.stanzaId === vv.key.id) {
+                
+                // 🛡️ safety check again
+                if (!isOwner) return;
 
-                if (!isOwner) {
-                    return conn.sendMessage(from, { text: "❌ Only *Owner* can change settings!" }, { quoted: msg });
-                }
-
-                switch (selectedOption) {
-                    case '1.1':
-                        reply("✅ Public Mode enabled");
-                        break;
-                    case '1.2':
-                        reply("✅ Private Mode enabled");
-                        break;
-                    case '1.3':
-                        reply("✅ Group Mode enabled");
-                        break;
-                    case '1.4':
-                        reply("✅ Inbox Mode enabled");
-                        break;
-                    case '2.1':
-                        reply("✅ Auto Voice ON");
-                        break;
-                    case '2.2':
-                        reply("✅ Auto Voice OFF");
-                        break;
-                    case '7.1':
-                        reply("🔄 Restarting Bot...");
-                        break;
-                    case '7.2':
-                        reply("⏹️ Shutting down Bot...");
-                        break;
-                    default:
-                        reply("❌ Invalid option, please select correctly.");
+                try {
+                    switch (selectedOption) {
+                        case '1.1':
+                            reply(".update MODE:public");
+                            reply("✅ Public Mode enabled");
+                            break;
+                        case '1.2':
+                            reply(".update MODE:private");
+                            reply("✅ Private Mode enabled");
+                            break;
+                        case '1.3':
+                            reply(".update MODE:group");
+                            reply("✅ Group Mode enabled");
+                            break;
+                        case '1.4':
+                            reply(".update MODE:inbox");
+                            reply("✅ Inbox Mode enabled");
+                            break;
+                        case '2.1':
+                            reply(".update AUTO_VOICE:true");
+                            reply(".restart");
+                            break;
+                        case '2.2':
+                            reply(".update AUTO_VOICE:false");
+                            reply(".restart");
+                            break;
+                        case '7.1':
+                            reply(".restart");
+                            break;
+                        case '7.2':
+                            reply(".shutdown");
+                            break;
+                        default:
+                            reply("❌ Invalid option, please select correctly.");
+                    }
+                } catch (error) {
+                    console.error('Env command error:', error);
+                    reply(`❌ Error processing option: ${error.message}`);
                 }
             }
         });
 
     } catch (error) {
         console.error('Env command error:', error);
-        reply(`❌ Error: ${error.message}`);
+        reply(`❌ Error displaying config: ${error.message}`);
     }
-});;
+});
