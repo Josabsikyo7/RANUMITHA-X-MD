@@ -53,7 +53,6 @@ cmd({
             const msg = msgUpdate.messages[0];
             if (!msg.message) return;
 
-            // Get text
             let text = "";
             if (msg.message.extendedTextMessage) text = msg.message.extendedTextMessage.text.trim();
             else if (msg.message.conversation) text = msg.message.conversation.trim();
@@ -62,20 +61,16 @@ cmd({
             const reactKey = msg?.key || menuMsg?.key;
             const validNumbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
 
-            // Non-owner reply → react ❌ + "Owner nemei!" + STOP
+            // If non-owner sends a number → react ❌ + owner-only message, then STOP
             if (!isOwner && validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-                await conn.sendMessage(from, { text: "❌ Owner nemei!", quoted: msg });
-                return; // Stop further processing to prevent double messages
+                await conn.sendMessage(from, { text: "❌ Only Owner can use envsettings replies!", quoted: msg });
+                return; // Stop processing
             }
 
-            // Owner reply → react ✅ for valid numbers
+            // Owner sends valid numbers → react ✅ + reply
             if (isOwner && validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "✅", key: reactKey } });
-            }
-
-            // Owner reply → send response
-            if (isOwner) {
                 switch (text) {
                     case '1.1': await reply("✅ Public Mode enabled"); break;
                     case '1.2': await reply("✅ Private Mode enabled"); break;
@@ -85,13 +80,14 @@ cmd({
                     case '2.2': await reply("✅ Auto Voice OFF"); break;
                     case '7.1': await reply("🔄 Restarting Bot..."); break;
                     case '7.2': await reply("⏹️ Shutting down Bot..."); break;
-                    default:
-                        // Invalid number typed by owner → react ❌ + invalid message
-                        if (text.match(/^\d\.\d$/)) {
-                            if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-                            await reply("❌ Invalid option, please select correctly.");
-                        }
                 }
+                return; // stop after responding
+            }
+
+            // Owner sends invalid number → react ❌ + invalid message
+            if (isOwner && text.match(/^\d\.\d$/) && !validNumbers.includes(text)) {
+                if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
+                await reply("❌ Invalid option, please select correctly.");
             }
         };
 
