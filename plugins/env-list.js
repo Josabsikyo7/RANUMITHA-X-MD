@@ -1,61 +1,54 @@
-const config = require('../config');
 const { cmd } = require('../command');
-const { runtime } = require('../lib/functions');
-const os = require("os");
-
-// ✅ Boolean checker
-function isEnabled(value) {
-    return value && value.toString().toLowerCase() === "true";
-}
+const config = require('../config');
 
 let lastEnvMsgId = null;
 
 cmd({
     pattern: "env",
-    alias: ["config", "settings", "setting"],
-    desc: "Show all bot configuration variables (Owner Only)",
-    category: "system",
+    desc: "Show environment configuration options",
+    category: "owner",
     react: "⚙️",
     filename: __filename
-}, 
-async (conn, mek, m, { from, reply, isOwner }) => {
+}, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        if (!isOwner) return reply("🚫 *Owner Only Command!*");
+        if (!isOwner) return reply("❌ Owner only!");
 
-        let envSettings = `╭───『 *${config.BOT_NAME} CONFIG* 』───❏
-│
-├─❏ *🤖 BOT INFO*
-│  ├─∘ *Name:* ${config.BOT_NAME}
-│  ├─∘ *Prefix:* ${config.PREFIX}
-│  ├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
-│  ├─∘ *Number:* ${config.OWNER_NUMBER}
-│  ├─∘ *Version:* ${config.BOT_VERSION}
-│  └─∘ *Mode:* ${config.MODE.toUpperCase()}
-│
-...(rest settings same)...
-> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+        const envOptions = `
+⚙️ *Environment Settings Menu*
 
-        const vv = await conn.sendMessage(
-            from,
-            {
-                image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
-                caption: envSettings,
-                contextInfo: { mentionedJid: [m.sender] }
-            },
-            { quoted: mek }
-        );
+1. MODE
+   1.1 Public
+   1.2 Private
+   1.3 Group
+   1.4 Inbox
 
-        lastEnvMsgId = vv.key.id;
+2. AUTO VOICE
+   2.1 ON
+   2.2 OFF
 
-        await conn.sendMessage(
-            from,
-            {
-                audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3' },
-                mimetype: 'audio/mp4',
-                ptt: true
-            },
-            { quoted: mek }
-        );
+3. AUTO READ STATUS
+   3.1 ON
+   3.2 OFF
+
+4. AUTO BIO
+   4.1 ON
+   4.2 OFF
+
+5. NEWS
+   5.1 Start
+   5.2 Stop
+
+6. AUTO TYPING
+   6.1 ON
+   6.2 OFF
+
+7. AUTO READ COMMAND
+   7.1 ON
+   7.2 OFF
+        `;
+
+        const sentMsg = await conn.sendMessage(from, { text: envOptions }, { quoted: mek });
+        lastEnvMsgId = sentMsg.key.id;
 
     } catch (error) {
         console.error('Env command error:', error);
@@ -63,7 +56,8 @@ async (conn, mek, m, { from, reply, isOwner }) => {
     }
 });
 
-// 📌 Listener - Owner Only (use isOwner)
+
+// === Listener for option selections ===
 conn.ev.on("messages.upsert", async (msgUpdate) => {
     try {
         const msg = msgUpdate.messages[0];
@@ -77,7 +71,7 @@ conn.ev.on("messages.upsert", async (msgUpdate) => {
         const isOwner = jid.endsWith("@s.whatsapp.net") &&
             config.OWNER_NUMBER.replace(/[^0-9]/g, "") === jid.split("@")[0];
 
-        if (!isOwner) return; // only owner
+        if (!isOwner) return; // Only owner can select
         if (contextId !== lastEnvMsgId) return;
 
         switch (selectedOption) {
@@ -132,11 +126,12 @@ conn.ev.on("messages.upsert", async (msgUpdate) => {
             default:
                 await conn.sendMessage(msg.key.remoteJid, { text: "❌ Invalid option. Owner Only!" });
         }
+
     } catch (error) {
         console.error('Env menu option error:', error);
         try {
-            await conn.sendMessage(msgUpdate.messages[0].key.remoteJid, { 
-                text: `❌ Error executing option: ${error.message}` 
+            await conn.sendMessage(msgUpdate.messages[0].key.remoteJid, {
+                text: `❌ Error executing option: ${error.message}`
             });
         } catch (err) {
             console.error("Failed to send error message:", err);
