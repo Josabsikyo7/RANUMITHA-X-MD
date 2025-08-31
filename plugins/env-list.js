@@ -9,6 +9,11 @@ function isEnabled(value) {
     return value && value.toString().toLowerCase() === "true";
 }
 
+// Convert owner number into proper JID
+function getOwnerJid() {
+    return config.OWNER_NUMBER.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
+}
+
 cmd({
     pattern: "env",
     alias: ["config", "settings", "setting"],
@@ -85,9 +90,9 @@ cmd({
             const context = msg.message.extendedTextMessage.contextInfo;
             if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
-            // Owner check
-            const senderIsOwner = replySender.includes(config.OWNER_NUMBER);
-            if (!senderIsOwner) {
+            // ✅ Owner check
+            const ownerJid = getOwnerJid();
+            if (replySender !== ownerJid) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
                 await conn.sendMessage(from, { text: "*🚫 Only Owner can access settings!*" }, { quoted: msg });
                 return;
