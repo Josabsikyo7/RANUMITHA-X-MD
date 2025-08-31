@@ -48,7 +48,7 @@ cmd({
             ptt: true
         }, { quoted: m || undefined });
 
-        // Listen to all new messages
+        // Listen to new messages
         const handler = async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
             if (!msg.message) return;
@@ -61,14 +61,14 @@ cmd({
             const reactKey = msg?.key || menuMsg?.key;
             const validNumbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
 
-            // If non-owner sends a number → react ❌ + owner-only message, then STOP
+            // Non-owner reply → react ❌ + warning, stop processing
             if (!isOwner && validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
                 await conn.sendMessage(from, { text: "❌ Only Owner can use envsettings replies!", quoted: msg });
-                return; // Stop processing
+                return;
             }
 
-            // Owner sends valid numbers → react ✅ + reply
+            // Owner valid number → react ✅ + response
             if (isOwner && validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "✅", key: reactKey } });
                 switch (text) {
@@ -81,10 +81,10 @@ cmd({
                     case '7.1': await reply("🔄 Restarting Bot..."); break;
                     case '7.2': await reply("⏹️ Shutting down Bot..."); break;
                 }
-                return; // stop after responding
+                return;
             }
 
-            // Owner sends invalid number → react ❌ + invalid message
+            // Owner invalid number → react ❌ + invalid message
             if (isOwner && text.match(/^\d\.\d$/) && !validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
                 await reply("❌ Invalid option, please select correctly.");
