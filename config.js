@@ -62,7 +62,7 @@ OWNER_NUMBER: process.env.OWNER_NUMBER || "94762095304",
 // add your bot owner number
 DEV: process.env.DEV || "94762095304",
 //replace with your whatsapp number
-BOT_NUMBER: process.env.BOT_NUMBER || "94762095304",
+BOT_NUMBER: process.env.BOT_NUMBER || "94705349577",
 //replace with your whatsapp number (settings access oni nm nub eka daanna oni user ge)
 OWNER_NAME: process.env.OWNER_NAME || "HIRUKA RANUMITHA",
 // add bot owner name
