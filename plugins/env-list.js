@@ -19,7 +19,7 @@ cmd({
     category: "system",
     react: "⚙️",
     filename: __filename
-}, async (conn, mek, m, { from, reply, isCreator }) => {
+}, async (conn, mek, m, { from, quoted,reply, isCreator }) => {
     try {
         if (!isCreator) {
             await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
