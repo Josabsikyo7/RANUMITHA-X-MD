@@ -5,13 +5,13 @@ function isEnabled(value) {
     return value && value.toString().toLowerCase() === "true";
 }
 
-// Get Owner JID
+// Owner JID
 function getOwnerJid() {
     if (!config.OWNER_NUMBER) return null;
     return config.OWNER_NUMBER.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
 }
 
-// Get Bot main number JID
+// Bot JID
 function getBotJid() {
     if (!config.BOT_NUMBER) return null;
     return config.BOT_NUMBER.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
@@ -32,15 +32,6 @@ cmd({
 
     try {
         const senderJid = mek.sender;
-
-        // Only owner or bot number can access menu reply
-        const accessJid = [ownerJid];
-        if (botJid) accessJid.push(botJid);
-
-        if (!accessJid.includes(senderJid)) {
-            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-            return reply("🚫 *Only Owner can access!*");
-        }
 
         // Menu text
         let envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
@@ -73,6 +64,10 @@ cmd({
             "20.1","20.2","21.1","21.2"
         ];
 
+        // Allowed JIDs = Owner + Bot
+        const accessJid = [ownerJid];
+        if (botJid) accessJid.push(botJid);
+
         const handler = async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
             if (!msg.message || !msg.message.extendedTextMessage) return;
@@ -83,7 +78,7 @@ cmd({
 
             if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
-            // Only owner or bot number can reply
+            // Only Owner or Bot Number can reply
             if (!accessJid.includes(replySender)) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
                 await conn.sendMessage(from, { text: "*🚫 Only Owner can interact!*", quoted: msg });
@@ -97,6 +92,7 @@ cmd({
                 return;
             }
 
+            // React ✅
             await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
 
             try {
