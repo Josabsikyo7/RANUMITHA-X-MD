@@ -59,12 +59,13 @@ cmd({
             const reactKey = msg?.key || menuMsg?.key;
             const validNumbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
 
-            // ❌ Non-owner replies → react + owner-only message
-            if (!isOwner && validNumbers.includes(text)) {
-                if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-                await conn.sendMessage(from, { text: "❌ Only Owner can use envsettings replies!", quoted: msg });
-                return;
-            }
+        // ❌ Non-owner trying to open menu → react + warning
+        if (!isOwner) {
+            const reactKey = m?.key;
+            if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
+            return reply("❌ Only Owner can access env settings!", { quoted: m || undefined });
+        }
+
 
             // ✅ Owner valid number → react + response
             if (isOwner && validNumbers.includes(text)) {
