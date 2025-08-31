@@ -1,14 +1,9 @@
 const config = require('../config');
 const { cmd } = require('../command');
 const { runtime } = require('../lib/functions');
-const axios = require('axios');
 const os = require("os");
 
-// Helper to check boolean envs
-function isEnabled(value) {
-    return value && value.toString().toLowerCase() === "true";
-}
-
+// Env settings command
 cmd({
     pattern: "envsettings",
     alias: ["env", "config"],
@@ -38,13 +33,13 @@ cmd({
 ╰━━━━━━━━━━━━━━━━━━╯
 `;
 
-        // Send image + caption
+        // Send menu image
         const menuMsg = await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: mek });
 
-        // Send voice note
+        // Send menu voice
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
             mimetype: 'audio/mp4',
@@ -58,19 +53,20 @@ cmd({
 
             const sender = msg.key.participant || msg.key.remoteJid;
 
-            // Check if reply is to the menu message
+            // Check if reply is to the menu
             if (!msg.message.extendedTextMessage.contextInfo ||
                 msg.message.extendedTextMessage.contextInfo.stanzaId !== menuMsg.key.id) return;
 
-            // If not owner
+            const selectedOption = msg.message.extendedTextMessage.text.trim();
+
+            // If sender is NOT owner
             if (!isOwner(sender)) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
-                await conn.sendMessage(from, { text: "❌ Only *Owner* can change settings!" }, { quoted: msg });
-                return; // stop processing
+                await conn.sendMessage(from, { text: "❌ Owner nemei!" }, { quoted: msg });
+                return; // Stop processing
             }
 
-            // Owner selected an option
-            const selectedOption = msg.message.extendedTextMessage.text.trim();
+            // If sender IS owner, process option
             switch (selectedOption) {
                 case '1.1': reply("✅ Public Mode enabled"); break;
                 case '1.2': reply("✅ Private Mode enabled"); break;
@@ -83,7 +79,7 @@ cmd({
                 default: reply("❌ Invalid option, please select correctly.");
             }
 
-            // Remove listener after first valid reply
+            // Remove listener after reply
             conn.ev.off('messages.upsert', handler);
         };
 
