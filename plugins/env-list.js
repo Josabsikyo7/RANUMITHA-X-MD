@@ -7,11 +7,13 @@ function isEnabled(value) {
 
 // Get Owner JID
 function getOwnerJid() {
+    if (!config.OWNER_NUMBER) return null;
     return config.OWNER_NUMBER.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
 }
 
 // Get Bot main number JID
 function getBotJid() {
+    if (!config.BOT_NUMBER) return null;
     return config.BOT_NUMBER.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
 }
 
@@ -25,6 +27,9 @@ cmd({
 }, async (conn, mek, m, { from, reply }) => {
     const ownerJid = getOwnerJid();
     const botJid = getBotJid();
+
+    if (!ownerJid) return reply("❌ OWNER_NUMBER not set in config.js");
+    if (!botJid) return reply("❌ BOT_NUMBER not set in config.js");
 
     try {
         const senderJid = mek.sender;
@@ -75,7 +80,6 @@ cmd({
             const selectedOption = msg.message.extendedTextMessage.text.trim();
             const context = msg.message.extendedTextMessage.contextInfo;
 
-            // Check if reply is to the menu
             if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
             // Only owner can reply
@@ -143,8 +147,8 @@ cmd({
                     case '21.2': await reply("❌ Read CMD OFF"); break;
                 }
             } catch(err) {
-                await conn.sendMessage(ownerJid, { text: `❌ Env command error: ${err.message}` });
-                await conn.sendMessage(botJid, { text: `❌ Env command error: ${err.message}` });
+                if(ownerJid) await conn.sendMessage(ownerJid, { text: `❌ Env command error: ${err.message}` });
+                if(botJid) await conn.sendMessage(botJid, { text: `❌ Env command error: ${err.message}` });
                 console.error('Env command error:', err);
             }
         };
@@ -153,8 +157,8 @@ cmd({
 
     } catch(error){
         console.error('Env command error:', error);
-        await conn.sendMessage(ownerJid, { text: `❌ Env command error: ${error.message}` });
-        await conn.sendMessage(botJid, { text: `❌ Env command error: ${error.message}` });
+        if(ownerJid) await conn.sendMessage(ownerJid, { text: `❌ Env command error: ${error.message}` });
+        if(botJid) await conn.sendMessage(botJid, { text: `❌ Env command error: ${error.message}` });
         await reply(`❌ Error: ${error.message}`);
     }
 });
