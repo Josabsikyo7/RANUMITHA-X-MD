@@ -36,8 +36,7 @@ cmd({
     category: "system",
     react: "⚙️",
     filename: __filename
-}, 
-async (conn, mek, m, { from, quoted,reply, isOwner }) => {
+}, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
         // Non-owner access
         if (!isOwner) {
@@ -47,48 +46,146 @@ async (conn, mek, m, { from, quoted,reply, isOwner }) => {
         }
 
         // Menu text for owner
-        let envSettings = `╭───『 *${config.BOT_NAME} CONFIG* 』───❏
+        let envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 │
-├─❏ *🤖 BOT INFO*
-│  ├─∘ *Name:* ${config.BOT_NAME}
-│  ├─∘ *Prefix:* ${config.PREFIX}
-│  ├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
-│  ├─∘ *Number:* ${config.OWNER_NUMBER}
-│  ├─∘ *Version:* ${config.BOT_VERSION}
-│  └─∘ *Mode:* ${config.MODE.toUpperCase()}
-│
-├─❏ *⚙️ CORE SETTINGS*
-│  ├─∘ *Public Mode:* ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}
-│  ├─∘ *Always Online:* ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}
-│  ├─∘ *Read Msgs:* ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}
-│  └─∘ *Read Cmds:* ${isEnabled(config.READ_CMD) ? "✅" : "❌"}
-│
-├─❏ *🔌 AUTOMATION*
-│  ├─∘ *Auto Reply:* ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}
-│  ├─∘ *Auto React:* ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}
-│  ├─∘ *Custom React:* ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}
-│  ├─∘ *React Emojis:* ${config.CUSTOM_REACT_EMOJIS}
-│  ├─∘ *Auto Sticker:* ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}
-│  └─∘ *Auto Voice:* ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}
-│
-├─❏ *📢 STATUS SETTINGS*
-│  ├─∘ *Status Seen:* ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}
-│  └─∘ *Status React:* ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}
-│
-├─❏ *🛡️ SECURITY*
-│  └─∘ *Anti-VV:* ${isEnabled(config.ANTI_VV) ? "✅" : "❌"} 
-│
-├─❏ *🎨 MEDIA*
-│  ├─∘ *Alive Msg:* ${config.ALIVE_MSG}
-│  └─∘ *Sticker Pack:* ${config.STICKER_NAME}
-│
-├─❏ *⏳ MISC*
-│  ├─∘ *Auto Typing:* ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}
-│  ├─∘ *Auto Record:* ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}
-│  ├─∘ *Anti-Del Path:* ${config.ANTI_DEL_PATH}
-│  └─∘ *Dev Number:* ${config.DEV}
-│
-╰──────❏`;
+├─❏ *🔖 BOT INFO*
+├─∘ *Name:* RANUMITHA-X-MD
+├─∘ *Prefix:* ${config.PREFIX}
+├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+├─∘ *Number:* ${config.OWNER_NUMBER}
+├─∘ *Version:* ${config.BOT_VERSION}
+└─∘ *Mode:* ${config.MODE.toUpperCase()}
+    
+      ╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 🛡️ ─╮
+╭───────────────────╮
+│ SELECT WORK MODE *${config.MODE.toUpperCase()}*  |
+╰───────────────────╯ 
+  ┣ 1.1  Public  
+  ┣ 1.2  Private 
+  ┣ 1.3  Group   
+  ┗ 1.4  Inbox
+
+╭──────────────────╮
+│ Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}                 |
+╰──────────────────╯ 
+  ┣ 2.1  true  ✅ 
+  ┗ 2.2  false ❌
+
+╭──────────────────╮
+│ Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}                        |
+╰──────────────────╯ 
+  ┣ 3.1  true  ✅ 
+  ┗ 3.2  false ❌
+
+╭──────────────────╮
+│ Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}                    |
+╰──────────────────╯ 
+  ┣ 4.1  true  ✅ 
+  ┗ 4.2  false ❌
+
+╭──────────────────╮
+│ Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}                         |
+╰──────────────────╯ 
+  ┣ 5.1  true  ✅ 
+  ┗ 5.2  false ❌
+
+╭──────────────────╮
+│ Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+  ┣ 6.1  true  ✅ 
+  ┗ 6.2  false ❌
+
+╭──────────────────╮
+│ Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}                       |
+╰──────────────────╯ 
+  ┣ 7.1  true  ✅ 
+  ┗ 7.2  false ❌
+
+╭──────────────────╮
+│ Auto Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+  ┣ 8.1  true  ✅ 
+  ┗ 8.2  false ❌
+
+╭──────────────────╮
+│ Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}                         |
+╰──────────────────╯ 
+  ┣ 9.1  true  ✅ 
+  ┗ 9.2  false ❌
+
+╭──────────────────╮
+│ Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}              |
+╰──────────────────╯ 
+  ┣ 10.1  true  ✅ 
+  ┗ 10.2  false ❌
+
+╭──────────────────╮
+│ Auto Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}             |
+╰──────────────────╯ 
+  ┣ 11.1  true  ✅ 
+  ┗ 11.2  false ❌
+
+╭──────────────────╮
+│ Auto Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}             |
+╰──────────────────╯ 
+  ┣ 12.1  true  ✅ 
+  ┗ 12.2 false ❌
+
+╭──────────────────╮
+│ Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}                   |
+╰──────────────────╯ 
+  ┣ 13.1  true  ✅ 
+  ┗ 13.2  false ❌
+
+╭──────────────────╮
+│ Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}                                |
+╰──────────────────╯ 
+  ┣ 14.1  true  ✅ 
+  ┗ 14.2  false ❌
+
+╭──────────────────╮
+│ Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}                            |
+╰──────────────────╯ 
+  ┣ 15.1  true  ✅ 
+  ┗ 15.2  false ❌
+
+╭──────────────────╮
+│ Admin Events: ${isEnabled(config.ADMIN_EVENTS) ? "✅" : "❌"}                    |
+╰──────────────────╯ 
+  ┣ 16.1  true  ✅ 
+  ┗ 16.2  false ❌
+
+╭──────────────────╮
+│ Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}                              |
+╰──────────────────╯ 
+  ┣ 17.1  true  ✅ 
+  ┗ 17.2  false ❌
+
+╭──────────────────╮
+│ Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}                  |
+╰──────────────────╯ 
+  ┣ 18.1  true  ✅ 
+  ┗ 18.2  false ❌
+
+╭──────────────────╮
+│ Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}                              |
+╰──────────────────╯ 
+  ┣ 19.1  true  ✅ 
+  ┗ 19.2  false ❌
+
+╭──────────────────╮
+│ Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}                     |
+╰──────────────────╯ 
+  ┣ 20.1  true  ✅ 
+  ┗ 20.2  false ❌
+
+╭──────────────────╮
+│ Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+  ┣ 21.1  true  ✅ 
+  ┗ 21.2  false ❌
+
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
         // Send menu image
         const menuMsg = await conn.sendMessage(from, {
@@ -119,7 +216,7 @@ async (conn, mek, m, { from, quoted,reply, isOwner }) => {
             const senderIsOwner = replySender === conn.user.id || isOwner;
             if (!senderIsOwner) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
-                await conn.sendMessage(from, { text: "🚫 *Only Owner Can Access!*" }, { quoted: msg });
+                await conn.sendMessage(from, { text: "*🚫 Only Owner can access settings!*" }, { quoted: msg });
                 return;
             }
 
