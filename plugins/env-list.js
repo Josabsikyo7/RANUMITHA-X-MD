@@ -10,14 +10,14 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // Non-owner trying to open menu
+        // Non-owner access
         if (!isOwner) {
-            const reactKey = m?.key;
-            if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-            return reply("❌ Only Owner can access env settings!", { quoted: m || undefined });
+            // React ❌
+            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+            return reply("❌ Only Owner can access env settings!");
         }
 
-        // Menu text
+        // Menu text for owner
         let envSettings = `
 ╭━━━ 『 ${config.BOT_NAME} CONFIG 』━━━╮
 │
@@ -31,52 +31,46 @@ cmd({
 │
 │ 7.1  Restart Bot
 │ 7.2  Shutdown Bot
-│
-╰━━━━━━━━━━━━━━━━━━╯
-`;
+╰━━━━━━━━━━━━━━━━━━╯`;
 
-        // Send menu image (online link)
+        // Send menu image
         const menuMsg = await conn.sendMessage(from, {
-            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
+            image: { url: "./media/env.jpg" },
             caption: envSettings
-        }, { quoted: m || undefined });
+        }, { quoted: mek });
 
-        // Send menu audio (online link)
+        // Send menu voice
         await conn.sendMessage(from, {
-            audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
+            audio: { url: "./media/env.mp3" },
             mimetype: 'audio/mpeg',
             ptt: true
-        }, { quoted: m || undefined });
+        }, { quoted: mek });
 
-        // Listen to all new messages
+        // Listener for replies
         const handler = async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
-            if (!msg.message) return;
+            if (!msg.message || !msg.message.extendedTextMessage) return;
 
-            let text = "";
-            if (msg.message.extendedTextMessage) text = msg.message.extendedTextMessage.text.trim();
-            else if (msg.message.conversation) text = msg.message.conversation.trim();
-            else return;
+            const replySender = msg.key.participant || msg.key.remoteJid;
+            const selectedOption = msg.message.extendedTextMessage.text.trim();
 
-            const reactKey = msg?.key || menuMsg?.key;
+            // Check if the message is a reply to the menu
+            const context = msg.message.extendedTextMessage.contextInfo;
+            if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
-            // Non-owner sends number
-            if (!isOwner) {
-                const numbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
-                if (numbers.includes(text)) {
-                    if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-                    await conn.sendMessage(from, { text: "❌ Owner nemei!", quoted: msg });
-                }
+            // Verify owner
+            const senderIsOwner = replySender === conn.user.id || isOwner;
+            if (!senderIsOwner) {
+                await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
+                await conn.sendMessage(from, { text: "❌ Only Owner can access env settings!" }, { quoted: msg });
                 return;
             }
 
-            // Owner sends a number → react ✅
-            if (["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"].includes(text)) {
-                if (reactKey) await conn.sendMessage(from, { react: { text: "✅", key: reactKey } });
-            }
+            // React ✅ for owner
+            await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
 
-            // Send the response
-            switch (text) {
+            // Handle options
+            switch (selectedOption) {
                 case '1.1': await reply("✅ Public Mode enabled"); break;
                 case '1.2': await reply("✅ Private Mode enabled"); break;
                 case '1.3': await reply("✅ Group Mode enabled"); break;
@@ -85,20 +79,17 @@ cmd({
                 case '2.2': await reply("✅ Auto Voice OFF"); break;
                 case '7.1': await reply("🔄 Restarting Bot..."); break;
                 case '7.2': await reply("⏹️ Shutting down Bot..."); break;
-                default:
-                    if (text.match(/^\d\.\d$/)) {
-                        if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-                        await reply("❌ Invalid option, please select correctly.");
-                    }
+                default: await reply("❌ Invalid option, please select correctly.");
             }
+
+            // Remove listener after first reply
+            conn.ev.off('messages.upsert', handler);
         };
 
         conn.ev.on('messages.upsert', handler);
 
     } catch (error) {
         console.error('Env command error:', error);
-        const reactKey = m?.key;
-        if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-        reply(`❌ Error: ${error.message}`, { quoted: m || undefined });
+        reply(`❌ Error: ${error.message}`);
     }
 });
