@@ -35,16 +35,16 @@ cmd({
 ╰━━━━━━━━━━━━━━━━━━╯
 `;
 
-        // Send menu image
+        // Send menu image (online link)
         const menuMsg = await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: m || undefined });
 
-        // Send menu voice
+        // Send menu audio (online link)
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
-            mimetype: 'audio/mp4',
+            mimetype: 'audio/mpeg',
             ptt: true
         }, { quoted: m || undefined });
 
