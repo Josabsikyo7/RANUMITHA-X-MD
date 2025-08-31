@@ -3,7 +3,6 @@ const { cmd } = require('../command');
 const { runtime } = require('../lib/functions');
 const os = require("os");
 
-// Env settings command
 cmd({
     pattern: "envsettings",
     alias: ["env", "config"],
@@ -13,6 +12,7 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
+        // Only owner can open menu
         if (!isOwner) return reply("❌ Only Owner can access env settings!");
 
         // Menu text
@@ -35,14 +35,14 @@ cmd({
 
         // Send menu image
         const menuMsg = await conn.sendMessage(from, {
-            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
+            image: { url: "./media/env.jpg" },
             caption: envSettings
         }, { quoted: mek });
 
         // Send menu voice
         await conn.sendMessage(from, {
-            audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
-            mimetype: 'audio/mp4',
+            audio: { url: "./media/env.mp3" },
+            mimetype: 'audio/mpeg',
             ptt: true
         }, { quoted: mek });
 
@@ -51,35 +51,38 @@ cmd({
             const msg = msgUpdate.messages[0];
             if (!msg.message || !msg.message.extendedTextMessage) return;
 
-            const sender = msg.key.participant || msg.key.remoteJid;
+            const replySender = msg.key.participant || msg.key.remoteJid;
 
             // Check if reply is to the menu
-            if (!msg.message.extendedTextMessage.contextInfo ||
-                msg.message.extendedTextMessage.contextInfo.stanzaId !== menuMsg.key.id) return;
+            const context = msg.message.extendedTextMessage.contextInfo;
+            if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
             const selectedOption = msg.message.extendedTextMessage.text.trim();
 
-            // If sender is NOT owner
-            if (!isOwner(sender)) {
+            // Non-owner trying to select a number
+            if (!isOwner) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
                 await conn.sendMessage(from, { text: "❌ Owner nemei!" }, { quoted: msg });
-                return; // Stop processing
+                return;
             }
 
-            // If sender IS owner, process option
+            // Owner: first react ✅
+            await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
+
+            // Then send the confirmation message
             switch (selectedOption) {
-                case '1.1': reply("✅ Public Mode enabled"); break;
-                case '1.2': reply("✅ Private Mode enabled"); break;
-                case '1.3': reply("✅ Group Mode enabled"); break;
-                case '1.4': reply("✅ Inbox Mode enabled"); break;
-                case '2.1': reply("✅ Auto Voice ON"); break;
-                case '2.2': reply("✅ Auto Voice OFF"); break;
-                case '7.1': reply("🔄 Restarting Bot..."); break;
-                case '7.2': reply("⏹️ Shutting down Bot..."); break;
-                default: reply("❌ Invalid option, please select correctly.");
+                case '1.1': await reply("✅ Public Mode enabled"); break;
+                case '1.2': await reply("✅ Private Mode enabled"); break;
+                case '1.3': await reply("✅ Group Mode enabled"); break;
+                case '1.4': await reply("✅ Inbox Mode enabled"); break;
+                case '2.1': await reply("✅ Auto Voice ON"); break;
+                case '2.2': await reply("✅ Auto Voice OFF"); break;
+                case '7.1': await reply("🔄 Restarting Bot..."); break;
+                case '7.2': await reply("⏹️ Shutting down Bot..."); break;
+                default: await reply("❌ Invalid option, please select correctly.");
             }
 
-            // Remove listener after reply
+            // Remove listener after processing
             conn.ev.off('messages.upsert', handler);
         };
 
