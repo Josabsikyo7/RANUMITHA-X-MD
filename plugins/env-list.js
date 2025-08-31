@@ -21,14 +21,14 @@ cmd({
     category: "system",
     react: "⚙️",
     filename: __filename
-}, async (conn, mek, m, { from, reply, isOwner }) => {
+}, async (conn, mek, m, { from, reply, isCreator }) => { // <-- use isCreator here
     try {
-        if (!isOwner) {
+        if (!isCreator) { // only creator can access
             await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-            return reply("🚫 *Only Owner Can Access!*");
+            return reply("🚫 *Only Creator Can Access!*");
         }
 
-        // Menu text for owner
+        // Menu text for creator
         let envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 │
 ├─❏ *🔖 BOT INFO*
@@ -90,11 +90,11 @@ cmd({
             const context = msg.message.extendedTextMessage.contextInfo;
             if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
-            // ✅ Owner check
+            // ✅ Owner check using isCreator
             const ownerJid = getOwnerJid();
             if (replySender !== ownerJid) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
-                await conn.sendMessage(from, { text: "*🚫 Only Owner can access settings!*" }, { quoted: msg });
+                await conn.sendMessage(from, { text: "*🚫 Only Creator can access settings!*" }, { quoted: msg });
                 return;
             }
 
