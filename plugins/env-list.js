@@ -8,7 +8,7 @@ cmd({
     category: "owner",
     react: "⚙️",
     filename: __filename
-}, async (conn, mek, m, { from, reply, isOwner }) => {
+}, async (conn, mek, m, { from, isOwner, reply}) => {
     try {
         // ❌ Non-owner trying to open menu → react + warning
         if (!isOwner) {
