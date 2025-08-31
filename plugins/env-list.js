@@ -10,15 +10,15 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // Non-owner trying to open menu
+        // ❌ Non-owner trying to open menu → react + warning
         if (!isOwner) {
             const reactKey = m?.key;
             if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
             return reply("❌ Only Owner can access env settings!", { quoted: m || undefined });
         }
 
-        // Menu text
-        let envSettings = `
+        // Owner menu
+        const envSettings = `
 ╭━━━ 『 ${config.BOT_NAME} CONFIG 』━━━╮
 │
 │ 1.1  Public Mode
@@ -35,21 +35,19 @@ cmd({
 ╰━━━━━━━━━━━━━━━━━━╯
 `;
 
-        // Send menu image
         const menuMsg = await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: m || undefined });
 
-        // Send menu audio
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
             mimetype: 'audio/mpeg',
             ptt: true
         }, { quoted: m || undefined });
 
-        // Listen to new messages
-        const handler = async (msgUpdate) => {
+        // Listen to number replies
+        conn.ev.on('messages.upsert', async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
             if (!msg.message) return;
 
@@ -61,14 +59,14 @@ cmd({
             const reactKey = msg?.key || menuMsg?.key;
             const validNumbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
 
-            // Non-owner reply → react ❌ + warning, stop processing
+            // ❌ Non-owner replies → react + owner-only message
             if (!isOwner && validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
                 await conn.sendMessage(from, { text: "❌ Only Owner can use envsettings replies!", quoted: msg });
                 return;
             }
 
-            // Owner valid number → react ✅ + response
+            // ✅ Owner valid number → react + response
             if (isOwner && validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "✅", key: reactKey } });
                 switch (text) {
@@ -84,14 +82,12 @@ cmd({
                 return;
             }
 
-            // Owner invalid number → react ❌ + invalid message
+            // ❌ Owner invalid number → react + invalid message
             if (isOwner && text.match(/^\d\.\d$/) && !validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
                 await reply("❌ Invalid option, please select correctly.");
             }
-        };
-
-        conn.ev.on('messages.upsert', handler);
+        });
 
     } catch (error) {
         console.error('Env command error:', error);
