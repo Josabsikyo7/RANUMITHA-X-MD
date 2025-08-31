@@ -1,5 +1,8 @@
-const config = require('../config');
-const { cmd } = require('../command');
+const { cmd, commands } = require('../command');
+const { runtime } = require('../lib/functions');
+const axios = require('axios');
+const os = require("os")
+
 
 function isEnabled(value) {
     return value && value.toString().toLowerCase() === "true";
@@ -20,7 +23,7 @@ function getBotJid() {
 cmd({
     pattern: "env",
     alias: ["config","settings","setting"],
-    desc: "Show bot configuration (Owner Only Access)",
+    desc: "Show bot configuration (Owner or Bot Only Access)",
     category: "system",
     react: "⚙️",
     filename: __filename
@@ -154,7 +157,4 @@ cmd({
     } catch(error){
         console.error('Env command error:', error);
         if(ownerJid) await conn.sendMessage(ownerJid, { text: `❌ Env command error: ${error.message}` });
-        if(botJid) await conn.sendMessage(botJid, { text: `❌ Env command error: ${error.message}` });
-        await reply(`❌ Error: ${error.message}`);
-    }
-});
+        if(botJ
