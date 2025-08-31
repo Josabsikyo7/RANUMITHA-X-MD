@@ -12,9 +12,14 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        if (!isOwner) return reply("❌ Only Owner can access env settings!");
+        // Only owner can open menu
+        if (!isOwner) {
+    // React ❌ to the command message
+    await conn.sendMessage(m.from, { react: { text: "❌", key: m.key } });
+    // Send warning message
+    return reply("❌ Only Owner can access env settings!");
+}
 
-        // Menu text
         let envSettings = `
 ╭━━━ 『 ${config.BOT_NAME} CONFIG 』━━━╮
 │
@@ -45,26 +50,25 @@ cmd({
             ptt: true
         }, { quoted: mek });
 
-        // Single-use listener for replies
+        // Listener for replies to the menu
         const handler = async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
             if (!msg.message || !msg.message.extendedTextMessage) return;
 
-            const replySender = msg.key.participant || msg.key.remoteJid;
-            const selectedOption = msg.message.extendedTextMessage.text.trim();
-
-            // Check if the message is a reply to the menu
             const context = msg.message.extendedTextMessage.contextInfo;
             if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
-            // Non-owner reply
-            if (!isOwner) {
+            const selectedOption = msg.message.extendedTextMessage.text.trim();
+            const senderIsOwner = isOwner; // from command context
+
+            if (!senderIsOwner) {
+                // Non-owner: react ❌ and send warning
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
                 await conn.sendMessage(from, { text: "❌ Only Owner can access env settings!" }, { quoted: msg });
                 return;
             }
 
-            // Owner reply → react ✅ first
+            // Owner: react ✅ first
             await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
 
             // Send corresponding response
@@ -80,7 +84,7 @@ cmd({
                 default: await reply("❌ Invalid option, please select correctly."); 
             }
 
-            // Remove listener after first reply
+            // Remove listener after processing
             conn.ev.off('messages.upsert', handler);
         };
 
