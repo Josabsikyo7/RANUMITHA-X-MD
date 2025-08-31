@@ -12,145 +12,101 @@ function isEnabled(value) {
 cmd({
     pattern: "env",
     alias: ["config", "settings", "setting"],
-    desc: "Show all bot configuration variables (Owner Only)",
-    category: "system",
+    desc: "Show bot configuration options",
+    category: "owner",
     react: "⚙️",
     filename: __filename
-}, 
-async (conn, mek, m, { from, quoted, reply, isOwner }) => {
+}, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // Owner check
+        // 🛡️ Only Owner
         if (!isOwner) {
-            return reply("🚫 *Owner Only Command!*");
+            return reply("❌ Only the *Owner* can access this command!");
         }
 
-        let envSettings = `╭───『 *${config.BOT_NAME} CONFIG* 』───❏
+        // menu text
+        let menu = `
+╭━━━ 『 ${config.BOT_NAME} CONFIG 』━━━╮
 │
-├─❏ *🤖 BOT INFO*
-│  ├─∘ *Name:* ${config.BOT_NAME}
-│  ├─∘ *Prefix:* ${config.PREFIX}
-│  ├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
-│  ├─∘ *Number:* ${config.OWNER_NUMBER}
-│  ├─∘ *Version:* ${config.BOT_VERSION}
-│  └─∘ *Mode:* ${config.MODE.toUpperCase()}
+│ 1.1  Public Mode
+│ 1.2  Private Mode
+│ 1.3  Group Mode
+│ 1.4  Inbox Mode
 │
-├─❏ *⚙️ CORE SETTINGS*
-│  ├─∘ *Public Mode:* ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}
-│  ├─∘ *Always Online:* ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}
-│  ├─∘ *Read Msgs:* ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}
-│  └─∘ *Read Cmds:* ${isEnabled(config.READ_CMD) ? "✅" : "❌"}
+│ 2.1  Auto Voice ON
+│ 2.2  Auto Voice OFF
 │
-... (rest unchanged)
+│ 7.1  Restart Bot
+│ 7.2  Shutdown Bot
+│
+╰━━━━━━━━━━━━━━━━━━╯
 `;
 
-        // Send config with image and vCard quote  
-        const vv = await conn.sendMessage(
-            from,
-            {
-                image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
-                caption: envSettings,
-                contextInfo: {
-                    mentionedJid: [m.sender],
-                    forwardingScore: 999,
-                    isForwarded: false
-                }
-            },
-            { quoted: mek }
-        );
+        // 🖼️ send image with menu text
+        vv = await conn.sendMessage(from, {
+            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },  // put your env menu image path here
+            caption: menu
+        }, { quoted: mek });
 
-        // Optional PTT voice message
-        await conn.sendMessage(
-            from,
-            {
-                audio: { url: 'https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3' },
-                mimetype: 'audio/mp4',
-                ptt: true
-            },
-            { quoted: mek }
-        );
+        // 🎤 send voice note
+        await conn.sendMessage(from, {
+            audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },  // put your env voice path here
+            mimetype: 'audio/mp4',
+            ptt: true
+        }, { quoted: mek });
 
-        // Create one-time listener for reply options
+        // listen for replies
         conn.ev.on('messages.upsert', async (msgUpdate) => {
-            try {
-                const msg = msgUpdate.messages[0];
-                if (!msg.message || !msg.message.extendedTextMessage) return;
+            const msg = msgUpdate.messages[0];
+            if (!msg.message || !msg.message.extendedTextMessage) return;
 
-                const selectedOption = msg.message.extendedTextMessage.text.trim();
+            const selectedOption = msg.message.extendedTextMessage.text.trim();
 
-                // Only Owner can trigger these numbers
+            // reply check only if response is to env menu
+            if (msg.message.extendedTextMessage.contextInfo &&
+                msg.message.extendedTextMessage.contextInfo.stanzaId === vv.key.id) {
+                
+                // 🛡️ safety check again
                 if (!isOwner) return;
 
-                if (msg.message.extendedTextMessage.contextInfo && msg.message.extendedTextMessage.contextInfo.stanzaId === vv.key.id) {
+                try {
                     switch (selectedOption) {
                         case '1.1':
-                            reply(".update MODE:public" );
-                            reply("*`PUBLIC MOD` Selected successful ✅*");
+                            reply(".update MODE:public");
+                            reply("✅ Public Mode enabled");
                             break;
-                        case '1.2':               
+                        case '1.2':
                             reply(".update MODE:private");
-                            reply("*`PRIVATE MOD` Selected successful ✅*");
+                            reply("✅ Private Mode enabled");
                             break;
-                        case '1.3':               
+                        case '1.3':
                             reply(".update MODE:group");
-                            reply("*`GROUP MOD` Selected successful ✅*");
+                            reply("✅ Group Mode enabled");
                             break;
-                        case '1.4':     
+                        case '1.4':
                             reply(".update MODE:inbox");
-                            reply("*`INBOX MOD` Selected successful ✅*");
+                            reply("✅ Inbox Mode enabled");
                             break;
-                        case '2.1':     
+                        case '2.1':
                             reply(".update AUTO_VOICE:true");
-                            reply("ok ✅");
+                            reply(".restart");
                             break;
-                        case '2.2':     
+                        case '2.2':
                             reply(".update AUTO_VOICE:false");
-                            reply("ok ✅");
+                            reply(".restart");
                             break;
-                        case '3.1':    
-                            reply(".update AUTO_READ_STATUS:true");
-                            reply("ok ✅");
+                        case '7.1':
+                            reply(".restart");
                             break;
-                        case '3.2':    
-                            reply(".update AUTO_READ_STATUS:false");
-                            reply("ok ✅");
-                            break;
-                        case '4.1': 
-                            reply(".update AUTO_BIO:true");
-                            reply("ok ✅");
-                            break;
-                        case '4.2': 
-                            reply(".update AUTO_BIO:false");
-                            reply("ok ✅");
-                            break;
-                        case '5.1': 
-                            reply(".startnews");
-                            break;
-                        case '5.2': 
-                            reply(".stopnews");
-                            break;
-                        case '6.1':      
-                            reply(".update AUTO_TYPING:true");
-                            reply("ok ✅");
-                            break;
-                        case '6.2':   
-                            reply(".update AUTO_TYPING:false");
-                            reply("ok ✅");
-                            break;
-                        case '7.1': 
-                            reply(".update AUTO_READ_CMD:true");
-                            reply("ok ✅");
-                            break;
-                        case '7.2':   
-                            reply(".update AUTO_READ_CMD:false");
-                            reply("ok ✅");
+                        case '7.2':
+                            reply(".shutdown");
                             break;
                         default:
-                            reply("Invalid option. Please select a valid option 🔴");
+                            reply("❌ Invalid option, please select correctly.");
                     }
+                } catch (error) {
+                    console.error('Env command error:', error);
+                    reply(`❌ Error processing option: ${error.message}`);
                 }
-            } catch (err) {
-                console.error('Option select error:', err);
-                reply(`❌ Error processing option: ${err.message}`);
             }
         });
 
