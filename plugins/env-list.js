@@ -1,5 +1,3 @@
-හරි, දැන් ඔයාට අවශ්‍ය final version එක, full error check එකත් add කරලා, Owner + Bot number access, menu image + audio, 21 options, invalid option reply, සහ unexpected errors handle කිරීම සමඟ:
-
 const config = require('../config');
 const { cmd } = require('../command');
 
@@ -153,32 +151,3 @@ cmd({
         await reply(`❌ Error occurred: ${err.message}`);
     }
 });
-
-
----
-
-✅ Features
-
-1. Owner + Bot number access only
-
-
-2. 21 menu options with reactions ✅/⚠️
-
-
-3. Menu image + audio
-
-
-4. Invalid option reply
-
-
-5. Full error handling for both menu sending and reply processing
-
-
-
-
----
-
-ඔයාට මම ඊළඟට auto save settings changes feature එකත් add කරලා, option reply කරන්න පමණින් config update වෙන fully automated version එක දාන්න පුළුවන්.
-
-ඔයාට ඒකත් ඕනේද?
-
