@@ -29,15 +29,17 @@ cmd({
     const botJid = getBotJid();
 
     if (!ownerJid) return reply("❌ OWNER_NUMBER not set in config.js");
-    if (!botJid) return reply("❌ BOT_NUMBER not set in config.js");
 
     try {
         const senderJid = mek.sender;
 
-        // Only owner can access
-        if (senderJid !== ownerJid) {
+        // Only owner or bot number can access menu reply
+        const accessJid = [ownerJid];
+        if (botJid) accessJid.push(botJid);
+
+        if (!accessJid.includes(senderJid)) {
             await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
-            return reply("🚫 *Only Owner Can Access!*");
+            return reply("🚫 *Only Owner can access!*");
         }
 
         // Menu text
@@ -71,7 +73,6 @@ cmd({
             "20.1","20.2","21.1","21.2"
         ];
 
-        // Handle number reply
         const handler = async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
             if (!msg.message || !msg.message.extendedTextMessage) return;
@@ -82,8 +83,8 @@ cmd({
 
             if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
-            // Only owner can reply
-            if (replySender !== ownerJid) {
+            // Only owner or bot number can reply
+            if (!accessJid.includes(replySender)) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
                 await conn.sendMessage(from, { text: "*🚫 Only Owner can interact!*", quoted: msg });
                 return;
@@ -98,7 +99,6 @@ cmd({
 
             await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
 
-            // Execute owner option
             try {
                 switch(selectedOption){
                     case '1.1': await reply("✅ Public Mode enabled"); break;
