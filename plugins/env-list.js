@@ -34,7 +34,7 @@ cmd({
 `;
 
         // Send menu image
-        const menuMsg = await conn.sendMessage(from, {
+        await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: m || undefined });
@@ -46,30 +46,31 @@ cmd({
             ptt: true
         }, { quoted: m || undefined });
 
-        // Listener for replies to menu
+        // Listen to all new messages
         const handler = async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
-            if (!msg.message || !msg.message.extendedTextMessage) return;
+            if (!msg.message) return;
 
-            const context = msg.message.extendedTextMessage.contextInfo;
+            // Get text message
+            let text = "";
+            if (msg.message.extendedTextMessage) {
+                text = msg.message.extendedTextMessage.text.trim();
+            } else if (msg.message.conversation) {
+                text = msg.message.conversation.trim();
+            } else return;
 
-            // Only process replies to the menu
-            if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
-
-            const selectedOption = msg.message.extendedTextMessage.text.trim();
-
-            // Non-owner reply
+            // Non-owner sends any number
             if (!isOwner) {
-                await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
-                await conn.sendMessage(from, { text: "❌ Owner nemei!", quoted: msg });
+                const numbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
+                if (numbers.includes(text)) {
+                    await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
+                    await conn.sendMessage(from, { text: "❌ Owner nemei!", quoted: msg });
+                }
                 return;
             }
 
-            // Owner reply → react ✅ first
-            await conn.sendMessage(from, { react: { text: "✅", key: msg.key || {} } });
-
-            // Send corresponding response or react ❌ if invalid
-            switch (selectedOption) {
+            // Owner sends a number
+            switch (text) {
                 case '1.1': await reply("✅ Public Mode enabled"); break;
                 case '1.2': await reply("✅ Private Mode enabled"); break;
                 case '1.3': await reply("✅ Group Mode enabled"); break;
@@ -79,12 +80,12 @@ cmd({
                 case '7.1': await reply("🔄 Restarting Bot..."); break;
                 case '7.2': await reply("⏹️ Shutting down Bot..."); break;
                 default:
-                    await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
-                    await reply("❌ Invalid option, please select correctly.");
+                    // React ❌ if owner typed invalid number
+                    if (text.match(/^\d\.\d$/)) { // matches number like 1.1
+                        await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
+                        await reply("❌ Invalid option, please select correctly.");
+                    }
             }
-
-            // Remove listener after first reply
-            conn.ev.off('messages.upsert', handler);
         };
 
         conn.ev.on('messages.upsert', handler);
