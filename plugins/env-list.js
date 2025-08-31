@@ -59,16 +59,14 @@ cmd({
             else if (msg.message.conversation) text = msg.message.conversation.trim();
             else return;
 
-            // Reaction key (safe)
             const reactKey = msg?.key || menuMsg?.key;
-
             const validNumbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
 
-            // Non-owner reply → react ❌ + "Owner nemei!"
+            // Non-owner reply → react ❌ + "Owner nemei!" + STOP
             if (!isOwner && validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
                 await conn.sendMessage(from, { text: "❌ Owner nemei!", quoted: msg });
-                return; // stop processing
+                return; // Stop further processing to prevent double messages
             }
 
             // Owner reply → react ✅ for valid numbers
