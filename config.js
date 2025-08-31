@@ -58,7 +58,7 @@ READ_CMD: process.env.READ_CMD || "false",
 // true if want mark commands as read
 OWNER_NUM: process.env.OWNER_NUM || "94762095304",
 // add owner number 
-OWNER_NUMBER: process.env.OWNER_NUMBER || "94762095304,94705349577",
+OWNER_NUMBER: process.env.OWNER_NUMBER || "94762095304",
 // add your bot owner number
 DEV: process.env.DEV || "94762095304",
 //replace with your whatsapp number
