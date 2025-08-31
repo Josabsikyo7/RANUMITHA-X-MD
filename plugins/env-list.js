@@ -1,8 +1,7 @@
-const { cmd, commands } = require('../command');
-const { runtime } = require('../lib/functions');
-const axios = require('axios');
-const os = require("os")
+හරි, දැන් ඔයාට අවශ්‍ය final version එක, full error check එකත් add කරලා, Owner + Bot number access, menu image + audio, 21 options, invalid option reply, සහ unexpected errors handle කිරීම සමඟ:
 
+const config = require('../config');
+const { cmd } = require('../command');
 
 function isEnabled(value) {
     return value && value.toString().toLowerCase() === "true";
@@ -10,31 +9,32 @@ function isEnabled(value) {
 
 // Owner JID
 function getOwnerJid() {
-    if (!config.OWNER_NUMBER) return null;
     return config.OWNER_NUMBER.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
 }
 
 // Bot JID
-function getBotJid() {
-    if (!config.BOT_NUMBER) return null;
-    return config.BOT_NUMBER.replace(/[^0-9]/g, '') + "@s.whatsapp.net";
+function getBotJid(conn) {
+    return conn.user.id;
 }
 
 cmd({
     pattern: "env",
     alias: ["config","settings","setting"],
-    desc: "Show bot configuration (Owner or Bot Only Access)",
+    desc: "Bot settings (Owner + Bot number only) with Audio & Error Handling",
     category: "system",
     react: "⚙️",
     filename: __filename
 }, async (conn, mek, m, { from, reply }) => {
-    const ownerJid = getOwnerJid();
-    const botJid = getBotJid();
-
-    if (!ownerJid) return reply("❌ OWNER_NUMBER not set in config.js");
-
     try {
+        const ownerJid = getOwnerJid();
+        const botJid = getBotJid(conn);
+        const allowedJids = [ownerJid, botJid];
         const senderJid = mek.sender;
+
+        if (!allowedJids.includes(senderJid)) {
+            await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
+            return reply("🚫 *Only Owner or Bot number can interact!*");
+        }
 
         // Menu text
         let envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
@@ -56,7 +56,8 @@ cmd({
         // Send menu audio
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
-            mimetype: 'audio/mp4', ptt: true
+            mimetype: 'audio/mp4',
+            ptt: true
         }, { quoted: mek });
 
         const allowedOptions = [
@@ -67,38 +68,32 @@ cmd({
             "20.1","20.2","21.1","21.2"
         ];
 
-        // Allowed JIDs = Owner + Bot
-        const accessJid = [ownerJid];
-        if (botJid) accessJid.push(botJid);
-
         const handler = async (msgUpdate) => {
-            const msg = msgUpdate.messages[0];
-            if (!msg.message || !msg.message.extendedTextMessage) return;
-
-            const replySender = msg.key.participant || msg.key.remoteJid;
-            const selectedOption = msg.message.extendedTextMessage.text.trim();
-            const context = msg.message.extendedTextMessage.contextInfo;
-
-            if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
-
-            // Only Owner or Bot Number can reply
-            if (!accessJid.includes(replySender)) {
-                await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
-                await conn.sendMessage(from, { text: "*🚫 Only Owner can interact!*", quoted: msg });
-                return;
-            }
-
-            // Invalid option
-            if (!allowedOptions.includes(selectedOption)) {
-                await conn.sendMessage(from, { react: { text: "⚠️", key: msg.key } });
-                await conn.sendMessage(from, { text: "❌ Invalid option! Please select correct number.", quoted: msg });
-                return;
-            }
-
-            // React ✅
-            await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
-
             try {
+                const msg = msgUpdate.messages[0];
+                if (!msg.message || !msg.message.extendedTextMessage) return;
+
+                const replySender = msg.key.participant || msg.key.remoteJid;
+                const selectedOption = msg.message.extendedTextMessage.text.trim();
+                const context = msg.message.extendedTextMessage.contextInfo;
+
+                if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
+
+                if (!allowedJids.includes(replySender)) {
+                    await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
+                    await conn.sendMessage(from, { text: "*🚫 Only Owner or Bot number can interact!*", quoted: msg });
+                    return;
+                }
+
+                if (!allowedOptions.includes(selectedOption)) {
+                    await conn.sendMessage(from, { react: { text: "⚠️", key: msg.key } });
+                    await conn.sendMessage(from, { text: "❌ Invalid option! Please select correct number.", quoted: msg });
+                    return;
+                }
+
+                await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
+
+                // Handle all 21 options
                 switch(selectedOption){
                     case '1.1': await reply("✅ Public Mode enabled"); break;
                     case '1.2': await reply("✅ Private Mode enabled"); break;
@@ -110,8 +105,8 @@ cmd({
                     case '3.2': await reply("❌ Auto Typing OFF"); break;
                     case '4.1': await reply("✅ Always Online ON"); break;
                     case '4.2': await reply("❌ Always Online OFF"); break;
-                    case '5.1': await reply("✅ Public Mod ON"); break;
-                    case '5.2': await reply("❌ Public Mod OFF"); break;
+                    case '5.1': await reply("✅ Public Mode ON"); break;
+                    case '5.2': await reply("❌ Public Mode OFF"); break;
                     case '6.1': await reply("✅ Auto Voice ON"); break;
                     case '6.2': await reply("❌ Auto Voice OFF"); break;
                     case '7.1': await reply("✅ Auto Sticker ON"); break;
@@ -145,16 +140,45 @@ cmd({
                     case '21.1': await reply("✅ Read CMD ON"); break;
                     case '21.2': await reply("❌ Read CMD OFF"); break;
                 }
-            } catch(err) {
-                if(ownerJid) await conn.sendMessage(ownerJid, { text: `❌ Env command error: ${err.message}` });
-                if(botJid) await conn.sendMessage(botJid, { text: `❌ Env command error: ${err.message}` });
-                console.error('Env command error:', err);
+            } catch (err) {
+                console.error('Reply handler error:', err);
+                await reply(`❌ Error occurred: ${err.message}`);
             }
         };
 
         conn.ev.on('messages.upsert', handler);
 
-    } catch(error){
-        console.error('Env command error:', error);
-        if(ownerJid) await conn.sendMessage(ownerJid, { text: `❌ Env command error: ${error.message}` });
-        if(botJ
+    } catch (err) {
+        console.error('Env command error:', err);
+        await reply(`❌ Error occurred: ${err.message}`);
+    }
+});
+
+
+---
+
+✅ Features
+
+1. Owner + Bot number access only
+
+
+2. 21 menu options with reactions ✅/⚠️
+
+
+3. Menu image + audio
+
+
+4. Invalid option reply
+
+
+5. Full error handling for both menu sending and reply processing
+
+
+
+
+---
+
+ඔයාට මම ඊළඟට auto save settings changes feature එකත් add කරලා, option reply කරන්න පමණින් config update වෙන fully automated version එක දාන්න පුළුවන්.
+
+ඔයාට ඒකත් ඕනේද?
+
