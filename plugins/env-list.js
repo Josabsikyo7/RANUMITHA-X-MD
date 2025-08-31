@@ -35,14 +35,14 @@ cmd({
 
         // Send menu image
         const menuMsg = await conn.sendMessage(from, {
-            image: { url: "./media/env.jpg" },
+            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: mek });
 
         // Send menu voice
         await conn.sendMessage(from, {
-            audio: { url: "./media/env.mp3" },
-            mimetype: 'audio/mpeg',
+            audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
+            mimetype: 'audio/mp4',
             ptt: true
         }, { quoted: mek });
 
