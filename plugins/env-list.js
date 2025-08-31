@@ -35,13 +35,13 @@ cmd({
 ╰━━━━━━━━━━━━━━━━━━╯
 `;
 
-        // Send menu image (online link)
+        // Send menu image
         const menuMsg = await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: m || undefined });
 
-        // Send menu audio (online link)
+        // Send menu audio
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
             mimetype: 'audio/mpeg',
@@ -53,43 +53,47 @@ cmd({
             const msg = msgUpdate.messages[0];
             if (!msg.message) return;
 
+            // Get text
             let text = "";
             if (msg.message.extendedTextMessage) text = msg.message.extendedTextMessage.text.trim();
             else if (msg.message.conversation) text = msg.message.conversation.trim();
             else return;
 
+            // Reaction key (safe)
             const reactKey = msg?.key || menuMsg?.key;
 
-            // Non-owner sends number
-            if (!isOwner) {
-                const numbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
-                if (numbers.includes(text)) {
-                    if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-                    await conn.sendMessage(from, { text: "❌ Owner nemei!", quoted: msg });
-                }
-                return;
+            const validNumbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
+
+            // Non-owner reply → react ❌ + "Owner nemei!"
+            if (!isOwner && validNumbers.includes(text)) {
+                if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
+                await conn.sendMessage(from, { text: "❌ Owner nemei!", quoted: msg });
+                return; // stop processing
             }
 
-            // Owner sends a number → react ✅
-            if (["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"].includes(text)) {
+            // Owner reply → react ✅ for valid numbers
+            if (isOwner && validNumbers.includes(text)) {
                 if (reactKey) await conn.sendMessage(from, { react: { text: "✅", key: reactKey } });
             }
 
-            // Send the response
-            switch (text) {
-                case '1.1': await reply("✅ Public Mode enabled"); break;
-                case '1.2': await reply("✅ Private Mode enabled"); break;
-                case '1.3': await reply("✅ Group Mode enabled"); break;
-                case '1.4': await reply("✅ Inbox Mode enabled"); break;
-                case '2.1': await reply("✅ Auto Voice ON"); break;
-                case '2.2': await reply("✅ Auto Voice OFF"); break;
-                case '7.1': await reply("🔄 Restarting Bot..."); break;
-                case '7.2': await reply("⏹️ Shutting down Bot..."); break;
-                default:
-                    if (text.match(/^\d\.\d$/)) {
-                        if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-                        await reply("❌ Invalid option, please select correctly.");
-                    }
+            // Owner reply → send response
+            if (isOwner) {
+                switch (text) {
+                    case '1.1': await reply("✅ Public Mode enabled"); break;
+                    case '1.2': await reply("✅ Private Mode enabled"); break;
+                    case '1.3': await reply("✅ Group Mode enabled"); break;
+                    case '1.4': await reply("✅ Inbox Mode enabled"); break;
+                    case '2.1': await reply("✅ Auto Voice ON"); break;
+                    case '2.2': await reply("✅ Auto Voice OFF"); break;
+                    case '7.1': await reply("🔄 Restarting Bot..."); break;
+                    case '7.2': await reply("⏹️ Shutting down Bot..."); break;
+                    default:
+                        // Invalid number typed by owner → react ❌ + invalid message
+                        if (text.match(/^\d\.\d$/)) {
+                            if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
+                            await reply("❌ Invalid option, please select correctly.");
+                        }
+                }
             }
         };
 
