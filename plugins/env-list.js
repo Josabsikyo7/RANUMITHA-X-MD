@@ -12,13 +12,11 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // Only owner can open menu
+        // React ❌ + send message if non-owner runs the command
         if (!isOwner) {
-    // React ❌ to the command message
-    await conn.sendMessage(m.from, { react: { text: "❌", key: m.key } });
-    // Send warning message
-    return reply("❌ Only Owner can access env settings!");
-}
+            await conn.sendMessage(m.from, { react: { text: "❌", key: m.key } });
+            return reply("❌ Only Owner can access env settings!");
+        }
 
         let envSettings = `
 ╭━━━ 『 ${config.BOT_NAME} CONFIG 』━━━╮
@@ -37,20 +35,17 @@ cmd({
 ╰━━━━━━━━━━━━━━━━━━╯
 `;
 
-        // Send menu image
         const menuMsg = await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: mek });
 
-        // Send menu voice
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
             mimetype: 'audio/mp4',
             ptt: true
         }, { quoted: mek });
 
-        // Listener for replies to the menu
         const handler = async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
             if (!msg.message || !msg.message.extendedTextMessage) return;
@@ -59,19 +54,17 @@ cmd({
             if (!context?.stanzaId || context.stanzaId !== menuMsg.key.id) return;
 
             const selectedOption = msg.message.extendedTextMessage.text.trim();
-            const senderIsOwner = isOwner; // from command context
 
-            if (!senderIsOwner) {
-                // Non-owner: react ❌ and send warning
+            // Non-owner reply to menu
+            if (!isOwner) {
                 await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
-                await conn.sendMessage(from, { text: "❌ Only Owner can access env settings!" }, { quoted: msg });
+                await conn.sendMessage(from, { text: "❌ Owner nemei!", quoted: msg });
                 return;
             }
 
-            // Owner: react ✅ first
+            // Owner reply → react ✅ first
             await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
 
-            // Send corresponding response
             switch (selectedOption) {
                 case '1.1': await reply("✅ Public Mode enabled"); break;
                 case '1.2': await reply("✅ Private Mode enabled"); break;
@@ -84,7 +77,6 @@ cmd({
                 default: await reply("❌ Invalid option, please select correctly."); 
             }
 
-            // Remove listener after processing
             conn.ev.off('messages.upsert', handler);
         };
 
