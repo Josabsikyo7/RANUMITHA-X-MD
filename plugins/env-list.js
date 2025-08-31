@@ -8,9 +8,9 @@ cmd({
     category: "owner",
     react: "⚙️",
     filename: __filename
-}, async (conn, mek, m, { from, isOwner, reply}) => {
+}, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // ❌ Non-owner trying to open menu → react + warning
+        // Non-owner trying to open menu → react + warning
         if (!isOwner) {
             const reactKey = m?.key;
             if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
@@ -46,7 +46,7 @@ cmd({
             ptt: true
         }, { quoted: m || undefined });
 
-        // Listen to number replies
+        // Listen to messages
         conn.ev.on('messages.upsert', async (msgUpdate) => {
             const msg = msgUpdate.messages[0];
             if (!msg.message) return;
@@ -59,13 +59,12 @@ cmd({
             const reactKey = msg?.key || menuMsg?.key;
             const validNumbers = ["1.1","1.2","1.3","1.4","2.1","2.2","7.1","7.2"];
 
-        // ❌ Non-owner trying to open menu → react + warning
-        if (!isOwner) {
-            const reactKey = m?.key;
-            if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
-            return reply("❌ Only Owner can access env settings!", { quoted: m || undefined });
-        }
-
+            // ❌ Non-owner number reply → react + warning, NO actual reply
+            if (!isOwner && validNumbers.includes(text)) {
+                if (reactKey) await conn.sendMessage(from, { react: { text: "❌", key: reactKey } });
+                await conn.sendMessage(from, { text: "❌ Only Owner can use envsettings replies!", quoted: msg });
+                return;
+            }
 
             // ✅ Owner valid number → react + response
             if (isOwner && validNumbers.includes(text)) {
