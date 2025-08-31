@@ -84,7 +84,8 @@ cmd({
     // React ❌ to the message
     await conn.sendMessage(from, { react: { text: "❌", key: msg.key || {} } });
     // Send invalid option message
-    await reply("❌ Invalid option, please select correctly.");
+    await reply("❌ Invalid option, please select correctly."); 
+               }
 
             // Remove listener after processing
             conn.ev.off('messages.upsert', handler);
