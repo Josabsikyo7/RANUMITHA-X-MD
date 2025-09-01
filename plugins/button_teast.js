@@ -1,7 +1,7 @@
 const { cmd } = require('../command');
 
 cmd({
-  pattern: "menu",
+  pattern: "bab",
   desc: "Show bot menu (Stable Buttons)",
   category: "system",
   react: "📂",
