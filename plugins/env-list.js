@@ -59,7 +59,7 @@ cmd({
     category: "system",
     react: "⚙️",
     filename: __filename
-}, async (conn, mek, m, { from, reply }) => {
+}, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
         // --- Owner check for sending menu ---
         const isOwner = mek.sender === config.OWNER_NUMBER + "@s.whatsapp.net";
