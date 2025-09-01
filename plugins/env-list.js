@@ -1,47 +1,49 @@
 const config = require('../config');
 const { cmd } = require('../command');
 
-// Helper function to check boolean envs
-function isEnabled(value) {
-    return value && value.toString().toLowerCase() === "true";
-}
-
 cmd({
-    pattern: "env",
-    alias: ["config", "settings", "setting"],
-    desc: "Show bot configuration variables (Owner Reply Only)",
-    category: "system",
+    pattern: "envsettings",
+    alias: ["env", "config"],
+    desc: "Show bot configuration options",
+    category: "owner",
     react: "⚙️",
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        if (!isOwner) return reply("🚫 *Owner Only Command!*");
+        if (!isOwner) {
+            await conn.sendMessage(from, { react: { text: "🚫", key: mek.key } });
+            return reply("🚫 Only Owner can use this command!");
+        }
 
-        // Menu text
-        const envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
-├─ Name: RANUMITHA-X-MD
-├─ Prefix: ${config.PREFIX}
-├─ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
-├─ Version: ${config.BOT_VERSION}
-└─ Mode: ${config.MODE.toUpperCase()}
+        const text = mek.body?.trim();
 
-> Reply with numbers (e.g. 1.1 / 2.1) or type 'exit' to close.`;
+        // Valid numbers
+        const validNumbers = [
+            "1.1","1.2","1.3","1.4",
+            "2.1","2.2",
+            "3.1","3.2",
+            "4.1","4.2",
+            "5.1","5.2",
+            "6.1","6.2",
+            "7.1","7.2",
+            "8.1","8.2",
+            "9.1","9.2",
+            "10.1","10.2",
+            "11.1","11.2",
+            "12.1","12.2",
+            "13.1","13.2",
+            "14.1","14.2",
+            "15.1","15.2",
+            "16.1","16.2",
+            "17.1","17.2",
+            "18.1","18.2",
+            "19.1","19.2",
+            "20.1","20.2",
+            "21.1","21.2"
+        ];
 
-        // Send menu image
-        await conn.sendMessage(from, {
-            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
-            caption: envSettings
-        });
-
-        // Send menu audio
-        await conn.sendMessage(from, {
-            audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
-            mimetype: 'audio/mp4',
-            ptt: true
-        });
-
-        // Menu actions mapping
-        const menuActions = {
+        // Replies for each option
+        const replies = {
             "1.1": "✅ Public Mode enabled",
             "1.2": "✅ Private Mode enabled",
             "1.3": "✅ Group Mode enabled",
@@ -88,40 +90,13 @@ cmd({
             "21.2": "❌ Read CMD OFF"
         };
 
-        // Number reply handler
-        const handler = async (msgUpdate) => {
-            try {
-                const msg = msgUpdate.messages[0];
-                if (!msg.message) return;
+        if (validNumbers.includes(text)) {
+            await conn.sendMessage(from, { react: { text: "✅", key: mek.key } });
+            return reply(replies[text] || "⚙️ Option updated");
+        }
 
-                const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
-                if (!text) return;
-
-                if (text === "exit") {
-                    await reply("✅ Settings menu closed.");
-                    conn.ev.off('messages.upsert', handler);
-                    return;
-                }
-
-                // ✅ Strict number validation using regex
-                if (/^(1\.1|1\.2|1\.3|1\.4|2\.1|2\.2|3\.1|3\.2|4\.1|4\.2|5\.1|5\.2|6\.1|6\.2|7\.1|7\.2|8\.1|8\.2|9\.1|9\.2|10\.1|10\.2|11\.1|11\.2|12\.1|12\.2|13\.1|13\.2|14\.1|14\.2|15\.1|15\.2|16\.1|16\.2|17\.1|17\.2|18\.1|18\.2|19\.1|19\.2|20\.1|20\.2|21\.1|21\.2)$/.test(text)) {
-                    // React without quoting/tagging
-                    await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
-                    // Send reply message only
-                    await reply(menuActions[text]);
-                } else if (/^\d{1,2}\.\d$/.test(text)) {
-                    await reply("❌ Invalid option, please select correctly.");
-                }
-
-            } catch (err) {
-                console.error("Handler error:", err);
-            }
-        };
-
-        conn.ev.on('messages.upsert', handler);
-
-    } catch (error) {
-        console.error('Env command error:', error);
-        reply(`❌ Error: ${error.message}`);
+    } catch (e) {
+        console.error(e);
+        reply("❌ Error while processing command!");
     }
 });
