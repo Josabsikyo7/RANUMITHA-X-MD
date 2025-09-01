@@ -9,19 +9,28 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, text, reply }) => {
     try {
-        if (!text) return await reply("❌ Please send your phone number e.g., +9400000000");
+        if (!text) return await reply("❌ Please send your phone number e.g., 071XXXXXXX");
 
-        const number = text.trim();
-        if (!/^\+94\d{9}$/.test(number)) {
-            return await reply("❌ Invalid number format! Use +94XXXXXXXXX");
+        let number = text.trim();
+
+        // Auto convert local 0XXXXXXX to +94XXXXXXXXX
+        if (/^0\d{9}$/.test(number)) {
+            number = "+94" + number.slice(1);
         }
 
-        // send request to site to generate code
-        const response = await axios.post("https://visper-md-offical.vercel.app/pair", {
-            phone: number
-        });
+        // Only allow +94 numbers now
+        if (!/^\+94\d{9}$/.test(number)) {
+            return await reply("❌ Invalid number! Only Sri Lanka numbers allowed.");
+        }
 
-        const { code, expiresIn } = response.data; // site returns { code: "ABC123", expiresIn: 60 }
+        // Send request to site
+        const response = await axios.post(
+            "https://visper-md-offical.vercel.app/api/pair",
+            { phone: number },
+            { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        const { code, expiresIn } = response.data;
 
         // send code to user
         await reply(`✅ Your pairing code: ${code}\nExpires in: ${expiresIn} seconds`);
@@ -30,7 +39,8 @@ cmd({
         await conn.sendMessage(from, { react: { text: '✅', key: mek.key } });
 
     } catch (err) {
-        await reply(`❌ Error: ${err.message || "Something went wrong!"}`);
+        console.error(err);
+        await reply(`❌ Error: ${err.response?.statusText || err.message || "Something went wrong!"}`);
         await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
     }
 });
