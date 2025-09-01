@@ -10,8 +10,6 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        if (!isOwner) return reply("🚫 Only Owner Can Use This Command!");
-
         const envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 ├─ Name: RANUMITHA-X-MD
 ├─ Prefix: ${config.PREFIX}
@@ -45,16 +43,17 @@ cmd({
 
                 text = text.trim();
 
+                // Owner check
                 if (!isOwner) {
-                    await reply("🚫 Only Owner can use this command!");
+                    await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
+                    await conn.sendMessage(from, { text: "🚫 Only Owner Can Use This Command!", quoted: msg });
                     return;
                 }
 
-                if (!/^\d+\.\d$/.test(text)) return;
-
+                // ✅ Owner: react ✅
                 await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
 
-                // Map number to reply text
+                // Map number to reply
                 const menuReplies = {
                     '1.1': "Public Mode enabled",
                     '1.2': "Private Mode enabled",
@@ -102,9 +101,9 @@ cmd({
                     '21.2': "Read CMD OFF"
                 };
 
-                const replyText = menuReplies[text] || `❌ Invalid option (${text})`;
+                const replyText = menuReplies[text] ? `✅ ${menuReplies[text]} (${text})` : `❌ Invalid option (${text})`;
 
-                // ✅ Reply tagging the original number message
+                // Reply quoting the original number message
                 await conn.sendMessage(from, { text: replyText, quoted: msg });
 
             } catch (err) {
