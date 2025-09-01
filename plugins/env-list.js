@@ -36,16 +36,17 @@ cmd({
     category: "system",
     react: "⚙️",
     filename: __filename
-}, async (conn, mek, m, { from, quoted, reply, isOwner }) => {
+}, async (conn, mek, m, { from, isOwner,quoted, reply, }) => {
     try {
         // --- Owner check ---
         if (!isOwner) {
             await conn.sendMessage(from, { react: { text: "❌", key: mek.key } });
             return reply("🚫 *Owner Only Command!*");
-        }
-
-        // --- Menu text ---
-        let envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
+    
+            // Count total commands
+        const totalCommands = Object.keys(commands).length;
+        
+        const info = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 │
 ├─❏ *🔖 BOT INFO*
 ├─∘ *Name:* RANUMITHA-X-MD
@@ -187,43 +188,56 @@ cmd({
 ╰──────────────────❏
 
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+        const image = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg"; // define image url
+        const audioUrl = "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3"; // audio url / local file
 
-        // Send menu image
-        await conn.sendMessage(from, {
-            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
-            caption: envSettings
-        }, { quoted: fakevCard });
+        // Send image
+        const sentMsg = await conn.sendMessage(
+            from,
+            { image: { url: image }, caption: info },
+            { quoted: fakevCard }
+        );
 
-        // Send menu audio
-        await conn.sendMessage(from, {
-            audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
-            mimetype: 'audio/mp4',
-            ptt: true
-        }, { quoted: mek });
+        const messageID = sentMsg.key.id; // get sent message ID
 
-        // --- Number reply handler ---
-        const handler = async (msgUpdate) => {
-            try {
-                const msg = msgUpdate.messages[0];
-                if (!msg.message) return;
+        // Send audio (voice note style)
+        await conn.sendMessage(
+            from,
+            { audio: { url: audioUrl }, mimetype: 'audio/mp4', ptt: true },
+            { quoted: mek }
+        );
 
-                let text = msg.message.conversation || msg.message.extendedTextMessage?.text;
-                if (!text) return;
-                text = text.trim();
+        // Listen for user reply
+conn.ev.on('messages.upsert', async (msgUpdate) => {
+    const mekInfo = msgUpdate?.messages[0];
+    if (!mekInfo?.message) return;
 
-                const sender = msg.key.participant || msg.key.remoteJid;
+    const fromUser = mekInfo.key.remoteJid;
+    const textMsg =
+        mekInfo.message.conversation ||
+        mekInfo.message.extendedTextMessage?.text;
 
-                // Only owner can reply numbers
-                if (sender !== mek.key.remoteJid) return;
+    const quotedId =
+        mekInfo.message?.extendedTextMessage?.contextInfo?.stanzaId;
 
-                // ✅ react first for valid number
-                if (/^(1.1,1.2,1.3,1.4,2.1,2.2,3.1,3.2,4.1,4.2,5.1,5.2,6.1,6.2,7.1,7.2,8.1,8.2,9.1,9.2,10.1,10.2,11.1,11.2,12.1,12.2,13.1,13.2,14.1,14.2,15.1,15.2,16.1,16.2,17.1,17.2,18.1,18.2,19.1,19.2,20.1,20.2)$/.test(text)) {
-                    await conn.sendMessage(sender, { react: { text: "✅", key: msg.key } });
-                }
+    // check user replied to menu message
+    if (quotedId !== messageID) return;
 
-                // --- Send corresponding answer ---
-                switch (text) {
-                    case '1.1': await reply(".mode public"); break;
+    let userReply = textMsg?.trim();
+
+    if (/^(1.1|1.2|1.3|1.4|2.1|2.2|3.1|3.2|4.1|4.2|5.1|5.2)$/.test(userReply)) {
+        // ✅ react
+        await conn.sendMessage(fromUser, {
+            react: { text: '✅', key: mekInfo.key }
+        });
+
+        // menu image url එක
+        const menuImage = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg";
+
+        // send reply with image + caption
+        let captionText = "";
+        switch (userReply) {
+             case '1.1': await reply(".mode public"); break;
                     case '1.2': await reply(".mode private"); break;
                     case '1.3': await reply(".mode group"); break;
                     case '1.4': await reply(".mode inbox"); break;
@@ -265,26 +279,21 @@ cmd({
                     case '19.2': await reply(".antilinkkick off"); break;
                     case '20.1': await reply(".read-cmd on"); break;
                     case '20.2': await reply(".read-cmd off"); break;
-                    case 'exit':
-                        await reply("✅ Settings menu closed.");
-                        conn.ev.off('messages.upsert', handler);
-                        return;
-                    default:
-                        if (/^(1.1,1.2,1.3,1.4,2.1,2.2,3.1,3.2,4.1,4.2,5.1,5.2,6.1,6.2,7.1,7.2,8.1,8.2,9.1,9.2,10.1,10.2,11.1,11.2,12.1,12.2,13.1,13.2,14.1,14.2,15.1,15.2,16.1,16.2,17.1,17.2,18.1,18.2,19.1,19.2,20.1,20.2)$/.test(text)) {
-                            await reply("❌ Invalid option, please select correctly.");
-                        }
-                }
+        }
 
-            } catch (err) {
-                console.error("Handler error:", err);
-            }
-        };
+        await conn.sendMessage(fromUser,  
+            caption: captionText 
+        }, { quoted: mekInfo });
 
-        // Listen to message updates
-        conn.ev.on('messages.upsert', handler);
-
+    } else {
+        await conn.sendMessage(fromUser, { 
+            text: "❌ Invalid choice! Reply with 1-12" 
+        }, { quoted: mekInfo });
+    }
+});
     } catch (error) {
-        console.error('Env command error:', error);
-        reply(`❌ Error: ${error.message}`);
+        console.error(error);
+        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+        await reply(`❌ *Main error:* ${error.message || "Error!"}`);
     }
 });
