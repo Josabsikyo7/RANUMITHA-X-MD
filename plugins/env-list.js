@@ -226,7 +226,7 @@ cmd({
                     case '1.1': await reply(".mode public"); break;
                     case '1.2': await reply(".mode private"); break;
                     case '1.3': await reply(".mode group"); break;
-                    case '1.4': await reply(".mode"); break;
+                    case '1.4': await reply(".mode inbox"); break;
                     case '2.1': await reply(".auto-recording on"); break;
                     case '2.2': await reply(".auto-recording off"); break;
                     case '3.1': await reply(".auto-typing on"); break;
