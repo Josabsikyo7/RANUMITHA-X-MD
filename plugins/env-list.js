@@ -1,11 +1,6 @@
 const config = require('../config');
 const { cmd } = require('../command');
 
-// Helper function to check boolean envs
-function isEnabled(value) {
-    return value && value.toString().toLowerCase() === "true";
-}
-
 cmd({
     pattern: "env",
     alias: ["config", "settings", "setting"],
@@ -51,16 +46,13 @@ cmd({
                 text = text.trim();
 
                 if (!isOwner) {
-                    await reply("🚫 Only Owner Can Use This Command!");
+                    await reply("🚫 Only Owner can use this command!");
                     return;
                 }
 
                 if (!/^\d+\.\d$/.test(text)) return;
 
                 await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
-
-                const mention = [m.sender];
-                const mentionText = `@${m.sender.split("@")[0]}`;
 
                 // Map number to reply text
                 const menuReplies = {
@@ -110,12 +102,10 @@ cmd({
                     '21.2': "Read CMD OFF"
                 };
 
-                const replyText = menuReplies[text];
-                if (replyText) {
-                    await conn.sendMessage(from, { text: `✅ ${replyText} (${text}) ${mentionText}`, mentions: mention });
-                } else {
-                    await conn.sendMessage(from, { text: `❌ Invalid option (${text}) ${mentionText}`, mentions: mention });
-                }
+                const replyText = menuReplies[text] || `❌ Invalid option (${text})`;
+
+                // ✅ Reply tagging the original number message
+                await conn.sendMessage(from, { text: replyText, quoted: msg });
 
             } catch (err) {
                 console.error("Handler error:", err);
