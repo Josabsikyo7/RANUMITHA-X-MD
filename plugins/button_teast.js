@@ -1,31 +1,36 @@
 const { cmd } = require('../command');
+const axios = require('axios');
 
 cmd({
-  pattern: "button",
-  desc: "Show fancy bot menu with buttons",
-  category: "system",
-  react: "📂",
-  filename: __filename
-}, async (conn, mek, m, { from }) => {
-  try {
-    const buttons = [
-      { buttonId: "apk", buttonText: { displayText: "📱 APK" }, type: 1 },
-      { buttonId: "yt", buttonText: { displayText: "▶️ YouTube" }, type: 1 },
-      { buttonId: "fb", buttonText: { displayText: "📘 Facebook" }, type: 1 },
-      { buttonId: "fun", buttonText: { displayText: "🎮 Fun" }, type: 1 },
-      { buttonId: "info", buttonText: { displayText: "ℹ️ Info" }, type: 1 }
-    ];
+    pattern: "pair",
+    desc: "Generate pairing code for your number",
+    category: "system",
+    react: "🔗",
+    filename: __filename
+}, async (conn, mek, m, { from, text, reply }) => {
+    try {
+        if (!text) return await reply("❌ Please send your phone number e.g., +9400000000");
 
-    const buttonMessage = {
-      text: "📂 *WELCOME TO DARK-KNIGHT MENU* 📂\n\nSelect an option below 👇",
-      footer: "🛡 Dark-Knight MD",
-      buttons: buttons,
-      headerType: 1
-    };
+        const number = text.trim();
+        if (!/^\+94\d{9}$/.test(number)) {
+            return await reply("❌ Invalid number format! Use +94XXXXXXXXX");
+        }
 
-    await conn.sendMessage(from, buttonMessage, { quoted: mek });
-  } catch (e) {
-    console.log("❌ Error in menu:", e);
-    await conn.sendMessage(from, { text: "⚠️ Something went wrong!" }, { quoted: mek });
-  }
+        // send request to site to generate code
+        const response = await axios.post("https://visper-md-offical.vercel.app/pair", {
+            phone: number
+        });
+
+        const { code, expiresIn } = response.data; // site returns { code: "ABC123", expiresIn: 60 }
+
+        // send code to user
+        await reply(`✅ Your pairing code: ${code}\nExpires in: ${expiresIn} seconds`);
+
+        // react ✅
+        await conn.sendMessage(from, { react: { text: '✅', key: mek.key } });
+
+    } catch (err) {
+        await reply(`❌ Error: ${err.message || "Something went wrong!"}`);
+        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+    }
 });
