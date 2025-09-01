@@ -17,10 +17,10 @@ cmd({
     try {
         // --- Owner Check before showing menu ---
         if (!isOwner) {
-            return reply("🚫 *Owner Only Command!*");
+            return reply("🚫 Owner Only Command!");
         }
 
-        // Menu text
+        // Menu text  
         let envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 ├─ Name: RANUMITHA-X-MD
 ├─ Prefix: ${config.PREFIX}
@@ -28,41 +28,40 @@ cmd({
 ├─ Version: ${config.BOT_VERSION}
 └─ Mode: ${config.MODE.toUpperCase()}
 
-> Reply with numbers (e.g. 1.1 / 2.1) or type 'exit' to close.`;
+> Reply with numbers (e.g. 1.1 / 2.1).`;
 
-        // Send menu image
-        const menuMsg = await conn.sendMessage(from, {
+        // Send menu image  
+        await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: mek });
 
-        // Send menu audio
+        // Send menu audio  
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
             mimetype: 'audio/mp4',
             ptt: true
         }, { quoted: mek });
 
-        // --- Number reply handler ---
+        // --- Number reply handler ---  
         const handler = async (msgUpdate) => {
             try {
                 const msg = msgUpdate.messages[0];
                 if (!msg.message) return;
 
-                // ✅ Support conversation + extendedTextMessage
-                let text = msg.message.conversation
-                        || msg.message.extendedTextMessage?.text;
+                let text = msg.message.conversation || msg.message.extendedTextMessage?.text;
                 if (!text) return;
 
                 text = text.trim();
 
                 // --- Owner Only Check for number replies ---
                 if (!isOwner) {
-                    return reply("🚫 *Owner Only Command!*");
+                    await reply("🚫 Only Owner can use this command!");
+                    return; // Stop further processing
                 }
 
                 // ✅ react for valid number
-                if (/^(\d{1.1,1.2,1.3,1.4}\.\d)$/.test(text)) {
+                if (/^\d+\.\d$/.test(text)) {
                     await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
                 }
 
@@ -113,13 +112,8 @@ cmd({
                     case '21.1': await reply("✅ Read CMD ON"); break;
                     case '21.2': await reply("❌ Read CMD OFF"); break;
 
-                    case 'exit':
-                        await reply("✅ Settings menu closed.");
-                        conn.ev.off('messages.upsert', handler);
-                        return;
-
                     default:
-                        if (/^(\d{1.1,1.2,1.3,1.4}\.\d)$/.test(text)) {
+                        if (/^\d+\.\d$/.test(text)) {
                             await reply("❌ Invalid option, please select correctly.");
                         }
                 }
