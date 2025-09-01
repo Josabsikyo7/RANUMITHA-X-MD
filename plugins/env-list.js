@@ -10,7 +10,8 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // Send menu
+        if (!isOwner) return reply("🚫 Only Owner Can Use This Command!");
+
         const envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 ├─ Name: RANUMITHA-X-MD
 ├─ Prefix: ${config.PREFIX}
@@ -20,18 +21,20 @@ cmd({
 
 > Reply with numbers (e.g. 1.1 / 2.1).`;
 
+        // Send menu image
         await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: mek });
 
+        // Send menu audio
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
             mimetype: 'audio/mp4',
             ptt: true
         }, { quoted: mek });
 
-        // Map number to reply
+        // Map number to reply text
         const menuReplies = {
             '1.1': "Public Mode enabled",
             '1.2': "Private Mode enabled",
@@ -79,43 +82,33 @@ cmd({
             '21.2': "Read CMD OFF"
         };
 
-        // Number reply handler
-        const handler = async (msgUpdate) => {
-            try {
-                const msg = msgUpdate.messages[0];
-                if (!msg.message) return;
+        // Listen for number replies **once**
+        const numberHandler = async (msgUpdate) => {
+            const msg = msgUpdate.messages[0];
+            if (!msg.message) return;
 
-                const senderId = msg.key.participant || msg.key.remoteJid;
-                let text = msg.message.conversation || msg.message.extendedTextMessage?.text;
-                if (!text) return;
+            const sender = msg.key.participant || msg.key.remoteJid;
+            if (sender !== config.owner_number + "@s.whatsapp.net") return; // only owner can reply
 
-                text = text.trim();
+            const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
+            if (!text) return;
 
-                // Owner check for this specific number reply
-                const senderIsOwner = senderId === config.OWNER_NUMBER; // replace with your owner number check logic
-                if (!senderIsOwner) {
-                    await conn.sendMessage(from, { react: { text: "❌", key: msg.key } });
-                    await conn.sendMessage(from, { text: "🚫 Only Owner Can Use This Command!", quoted: msg });
-                    return;
-                }
+            if (!/^\d+\.\d$/.test(text)) return;
 
-                // ✅ React ✅ for owner
-                await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
+            const replyText = menuReplies[text] || `❌ Invalid option (${text})`;
 
-                const replyText = menuReplies[text] ? `✅ ${menuReplies[text]} (${text})` : `❌ Invalid option (${text})`;
+            // ✅ Reply directly to the number message
+            await conn.sendMessage(msg.key.remoteJid, { text: replyText, quoted: msg });
 
-                // Reply tagging the number message
-                await conn.sendMessage(from, { text: replyText, quoted: msg });
-
-            } catch (err) {
-                console.error("Handler error:", err);
-            }
+            // ✅ React with checkmark
+            await conn.sendMessage(msg.key.remoteJid, { react: { text: "✅", key: msg.key } });
         };
 
-        conn.ev.on('messages.upsert', handler);
+        // Attach **once** to avoid duplicates
+        conn.ev.once('messages.upsert', numberHandler);
 
-    } catch (error) {
-        console.error('Env command error:', error);
-        reply(`❌ Error: ${error.message}`);
+    } catch (err) {
+        console.error("Env command error:", err);
+        reply(`❌ Error: ${err.message}`);
     }
 });
