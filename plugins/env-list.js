@@ -9,6 +9,26 @@ function isEnabled(value) {
     return value && value.toString().toLowerCase() === "true";
 }
 
+// Fake ChatGPT vCard
+const fakevCard = {
+    key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "status@broadcast"
+    },
+    message: {
+        contactMessage: {
+            displayName: "© Mr Hiruka",
+            vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+END:VCARD`
+        }
+    }
+};
+
 cmd({
     pattern: "env",
     alias: ["config", "settings", "setting"],
@@ -32,8 +52,7 @@ cmd({
 ├─∘ *Prefix:* ${config.PREFIX}
 ├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
 ├─∘ *Number:* ${config.OWNER_NUMBER}
-├─∘ *Version:* ${config.BOT_VERSION}
-└─∘ *Mode:* ${config.MODE.toUpperCase()}
+└─∘ *Version:* ${config.BOT_VERSION}
     
       ╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 🛡️ ─╮
 ╭───────────────────╮
@@ -129,12 +148,6 @@ cmd({
 │ ┗ 15.2  false ❌
 │
 ╭──────────────────╮
-│ Admin Events: ${isEnabled(config.ADMIN_EVENTS) ? "✅" : "❌"}                    |
-╰──────────────────╯ 
-│ ┣ 16.1  true  ✅ 
-│ ┗ 16.2  false ❌
-│
-╭──────────────────╮
 │ Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}                              |
 ╰──────────────────╯ 
 │ ┣ 17.1  true  ✅ 
@@ -165,11 +178,11 @@ cmd({
 │ ┗ 21.2  false ❌
 │
 │
-├─❏ *⏳ MISC*
-│  ├─∘ *Auto Typing:* ❌
-│  ├─∘ *Auto Record:* ❌
-│  ├─∘ *Anti-Del Path:* log
-│  └─∘ *Dev Number:* 94762095304
+├─❏ *🦠 STATUS*
+│  ├─∘ Auto Status MSG: ${config.AUTO_STATUS_MSG}
+│  ├─∘ Custom React Emojis: ${config.CUSTOM_REACT_EMOJIS}
+│  ├─∘ Anti-Del Path: ${config.ANTI_DEL_PATH}
+│  └─∘ Dev Number: ${config.DEV}
 │
 ╰──────────────────❏
 
@@ -179,7 +192,7 @@ cmd({
         await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
-        }, { quoted: mek });
+        }, { quoted: fakevCard });
 
         // Send menu audio
         await conn.sendMessage(from, {
