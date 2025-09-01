@@ -49,20 +49,32 @@ const envReplies = {
     "21.2": "❌ Read CMD OFF"
 };
 
+// ===== Allowed numbers (dynamic) =====
+let allowedNumbers = [
+    config.BOT_NUMBER,      // Bot number
+    config.OWNER_NUMBER     // Owner
+];
+
+// ===== Helper to add/remove allowed numbers =====
+function addAllowedNumber(number) {
+    if (!allowedNumbers.includes(number)) allowedNumbers.push(number);
+}
+function removeAllowedNumber(number) {
+    allowedNumbers = allowedNumbers.filter(n => n !== number);
+}
+
 cmd({
     pattern: "env",
     alias: ["config", "settings", "setting"],
-    desc: "Show bot configuration variables (Owner Reply Only)",
+    desc: "Show bot configuration variables (Owner + allowed numbers Only)",
     category: "system",
     react: "⚙️",
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        // Owner or BOT_NUMBER check
-        if (!isOwner && from !== config.BOT_NUMBER) 
+        if (!isOwner && !allowedNumbers.includes(from))
             return reply("🚫 *Owner Only Command!*");
 
-        // ===== Menu Text =====
         const envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 ├─ Name: RANUMITHA-X-MD
 ├─ Prefix: ${config.PREFIX}
@@ -72,20 +84,17 @@ cmd({
 
 > Reply with numbers (e.g. 1.1 / 2.1) or type 'exit' to close.`;
 
-        // ===== Send Image =====
         await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: mek });
 
-        // ===== Send Audio =====
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
             mimetype: 'audio/mp4',
             ptt: true
         }, { quoted: mek });
 
-        // ===== Reply Handler =====
         const handler = async (msgUpdate) => {
             try {
                 const msg = msgUpdate.messages[0];
@@ -94,8 +103,7 @@ cmd({
                 const sender = msg.key.remoteJid;
                 const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || "").trim();
 
-                // Only owner or BOT_NUMBER can reply
-                if (!isOwner && sender !== config.BOT_NUMBER) return;
+                if (!allowedNumbers.includes(sender) && !isOwner) return;
 
                 if (text.toLowerCase() === "exit") {
                     await reply("⚙️ Env menu closed.");
@@ -104,9 +112,7 @@ cmd({
                 }
 
                 if (envReplies[text]) {
-                    // React to message
                     await conn.sendMessage(sender, { react: { text: "✅", key: msg.key } });
-                    // Reply text
                     await reply(envReplies[text]);
                 }
             } catch (err) {
@@ -114,7 +120,6 @@ cmd({
             }
         };
 
-        // ===== Add listener =====
         conn.ev.on('messages.upsert', handler);
 
     } catch (e) {
