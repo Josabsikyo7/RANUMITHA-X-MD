@@ -1,31 +1,30 @@
 const { cmd } = require('../command');
 
 cmd({
-  pattern: "btest",
+  pattern: "download",
   desc: "Show download menu",
-  category: "menu",
+  category: "btest",
   react: "📂",
   filename: __filename
-}, async (conn, mek, m, { from, reply }) => {
+}, async (conn, mek, m, { from }) => {
   try {
-    const buttons = [
-      { buttonId: 'apk', buttonText: { displayText: '📱 APK' }, type: 1 },
-      { buttonId: 'ig', buttonText: { displayText: '📸 Instagram' }, type: 1 },
-      { buttonId: 'fb', buttonText: { displayText: '📘 Facebook' }, type: 1 },
-      { buttonId: 'tiktok', buttonText: { displayText: '🎶 TikTok' }, type: 1 },
-      { buttonId: 'twitter', buttonText: { displayText: '🐦 Twitter' }, type: 1 },
+    const templateButtons = [
+      { index: 1, quickReplyButton: { displayText: "📱 APK", id: "apk" } },
+      { index: 2, quickReplyButton: { displayText: "📸 Instagram", id: "ig" } },
+      { index: 3, quickReplyButton: { displayText: "📘 Facebook", id: "fb" } },
+      { index: 4, quickReplyButton: { displayText: "🎶 TikTok", id: "tiktok" } },
+      { index: 5, quickReplyButton: { displayText: "🐦 Twitter", id: "twitter" } }
     ];
 
-    const buttonMessage = {
+    const templateMessage = {
       text: "╭─『 📂 DOWNLOAD MENU 📂 』\n│\n├─ Choose an option below 👇",
       footer: "RANUMITHA-X-MD",
-      buttons: buttons,
-      headerType: 1
+      templateButtons: templateButtons
     };
 
-    await conn.sendMessage(from, buttonMessage, { quoted: mek });
+    await conn.sendMessage(from, templateMessage, { quoted: mek });
   } catch (e) {
-    reply("❌ Error in sending menu!");
     console.log(e);
+    await conn.sendMessage(from, { text: "❌ Error in sending menu!" }, { quoted: mek });
   }
 });
