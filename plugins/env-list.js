@@ -58,7 +58,9 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        if (!isOwner) return reply("🚫 *Owner Only Command!*");
+        // Owner or BOT_NUMBER check
+        if (!isOwner && from !== config.BOT_NUMBER) 
+            return reply("🚫 *Owner Only Command!*");
 
         // ===== Menu Text =====
         const envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
@@ -92,7 +94,8 @@ cmd({
                 const sender = msg.key.remoteJid;
                 const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || "").trim();
 
-                if (!isOwner) return;
+                // Only owner or BOT_NUMBER can reply
+                if (!isOwner && sender !== config.BOT_NUMBER) return;
 
                 if (text.toLowerCase() === "exit") {
                     await reply("⚙️ Env menu closed.");
