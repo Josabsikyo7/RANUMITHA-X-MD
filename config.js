@@ -1,124 +1,89 @@
-const config = require('../config');
-const { cmd } = require('../command');
+const fs = require("fs");
+if (fs.existsSync("config.env"))
+  require("dotenv").config({ path: "./config.env" });
 
-// ===== Env reply list =====
-const envReplies = {
-    "1.1": "✅ Public Mode enabled",
-    "1.2": "✅ Private Mode enabled",
-    "1.3": "✅ Group Mode enabled",
-    "1.4": "✅ Inbox Mode enabled",
-    "2.1": "✅ Auto Recording ON",
-    "2.2": "❌ Auto Recording OFF",
-    "3.1": "✅ Auto Typing ON",
-    "3.2": "❌ Auto Typing OFF",
-    "4.1": "✅ Always Online ON",
-    "4.2": "❌ Always Online OFF",
-    "5.1": "✅ Public Mod ON",
-    "5.2": "❌ Public Mod OFF",
-    "6.1": "✅ Auto Voice ON",
-    "6.2": "❌ Auto Voice OFF",
-    "7.1": "✅ Auto Sticker ON",
-    "7.2": "❌ Auto Sticker OFF",
-    "8.1": "✅ Auto Reply ON",
-    "8.2": "❌ Auto Reply OFF",
-    "9.1": "✅ Auto React ON",
-    "9.2": "❌ Auto React OFF",
-    "10.1": "✅ Auto Status Seen ON",
-    "10.2": "❌ Auto Status Seen OFF",
-    "11.1": "✅ Auto Status Reply ON",
-    "11.2": "❌ Auto Status Reply OFF",
-    "12.1": "✅ Auto Status React ON",
-    "12.2": "❌ Auto Status React OFF",
-    "13.1": "✅ Custom React ON",
-    "13.2": "❌ Custom React OFF",
-    "14.1": "✅ Anti VV ON",
-    "14.2": "❌ Anti VV OFF",
-    "15.1": "✅ Welcome ON",
-    "15.2": "❌ Welcome OFF",
-    "16.1": "✅ Admin Events ON",
-    "16.2": "❌ Admin Events OFF",
-    "17.1": "✅ Anti Link ON",
-    "17.2": "❌ Anti Link OFF",
-    "18.1": "✅ Read Message ON",
-    "18.2": "❌ Read Message OFF",
-    "19.1": "✅ Anti Bad ON",
-    "19.2": "❌ Anti Bad OFF",
-    "20.1": "✅ Anti Link Kick ON",
-    "20.2": "❌ Anti Link Kick OFF",
-    "21.1": "✅ Read CMD ON",
-    "21.2": "❌ Read CMD OFF"
+function convertToBool(text, fault = "true") {
+  return text === fault ? true : false;
+}
+module.exports = {
+SESSION_ID: process.env.SESSION_ID || "ranu&vtZEFB6a#8WtVe3myFBgtpcAYpj3log62R-hneljnqCqw5GXvgj0",
+// add your Session Id (මුලට "ranu&")
+AUTO_RECORDING: process.env.AUTO_RECORDING || "false",
+// make it true for auto recoding 
+AUTO_TYPING: process.env.AUTO_TYPING || "false",
+// true for automatic show typing    
+ALWAYS_ONLINE: process.env.ALWAYS_ONLINE || "true",
+// maks true for always online 
+PREFIX: process.env.PREFIX || ".",
+// add your prifix for bot
+MODE: process.env.MODE || "public",
+// make bot public-private-inbox-group
+PUBLIC_MODE: process.env.PUBLIC_MODE || "true",
+// make false if want private mod
+AUTO_VOICE: process.env.AUTO_VOICE || "true",
+// make true for send automatic voices
+AUTO_STICKER: process.env.AUTO_STICKER || "true",
+// make true for automatic stickers 
+AUTO_REPLY: process.env.AUTO_REPLY || "true",
+// make true or false automatic text reply 
+AUTO_REACT: process.env.AUTO_REACT || "false",
+// make this true or false for auto react on all msgs
+AUTO_STATUS_SEEN: process.env.AUTO_STATUS_SEEN || "true",
+// make true or false status auto seen
+AUTO_STATUS_REPLY: process.env.AUTO_STATUS_REPLY || "false",
+// make true if you want auto reply on status 
+AUTO_STATUS_REACT: process.env.AUTO_STATUS_REACT || "true",
+// make true or false automatic status react
+CUSTOM_REACT: process.env.CUSTOM_REACT || "false",
+// make this true for custum emoji react
+ANTI_VV: process.env.ANTI_VV || "true",
+// true for anti once view 
+WELCOME: process.env.WELCOME || "false",
+// true if want welcome and goodbye msg in groups    
+ADMIN_EVENTS: process.env.ADMIN_EVENTS || "false",
+// make true to know who dismiss or promoted a member in group
+ANTI_LINK: process.env.ANTI_LINK || "false",
+// make anti link true,false for groups 
+MENTION_REPLY: process.env.MENTION_REPLY || "false",
+// make true if want auto voice reply if someone menetion you 
+DELETE_LINKS: process.env.DELETE_LINKS || "false",
+// automatic delete links witho remove member 
+READ_MESSAGE: process.env.READ_MESSAGE || "false",
+// Turn true or false for automatic read msgs
+ANTI_BAD: process.env.ANTI_BAD || "false",
+// false or true for anti bad words  
+ANTI_LINK_KICK: process.env.ANTI_LINK_KICK || "false",
+// make anti link true,false for groups 
+READ_CMD: process.env.READ_CMD || "false",
+// true if want mark commands as read
+BOT_NUMBER: process.env.BOT_NUMBER || "94705349577",
+//replace with your whatsapp number
+OWNER_NUM: process.env.OWNER_NUM || "94762095304",
+// add owner number 
+OWNER_NUMBER: process.env.OWNER_NUMBER || "94762095304",
+// add your bot owner number
+DEV: process.env.DEV || "94762095304",
+//replace with your whatsapp number
+OWNER_NAME: process.env.OWNER_NAME || "HIRUKA RANUMITHA",
+// add bot owner name
+CUSTOM_REACT_EMOJIS: process.env.CUSTOM_REACT_EMOJIS || "💝,💖,💗,❤️‍🩹,❤️,🧡,💛,💚,💙,💜,🤎,🖤,🤍",
+// chose custom react emojis by yourself 
+AUTO_STATUS_MSG: process.env.AUTO_STATUS_MSG || "*SEEN YOUR STATUS BY RANUMITHA-X-MD 🌛*",
+// set the auto reply massage on status reply  
+BOT_NAME: process.env.BOT_NAME || "RANUMITHA-X-MD",
+// add bot namw here for menu
+STICKER_NAME: process.env.STICKER_NAME || "RANUMITHA-X-MD",
+// type sticker pack name 
+DESCRIPTION: process.env.DESCRIPTION || "© Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛",
+// add bot owner name    
+ALIVE_IMG: process.env.ALIVE_IMG || "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/GridArt_20250726_193256660.jpg",
+// add img for alive msg
+MENU_IMAGE_URL: process.env.MENU_IMAGE_URL || "https://files.catbox.moe/ebcvj0.jpg",
+// add custom menu and mention reply image url
+LIVE_MSG: process.env.LIVE_MSG || "> 𝐌𝐚𝐝𝐞 𝐛𝐲 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔 🥶",
+// add alive msg here 
+ANTI_DEL_PATH: process.env.ANTI_DEL_PATH || "log", 
+// change it to 'same' if you want to resend deleted message in same chat 
+BOT_VERSION: process.env.BOT_VERSION || "3.5.8"
+
 };
-
-cmd({
-    pattern: "env",
-    alias: ["config", "settings", "setting"],
-    desc: "Show bot configuration variables (Owner Reply Only)",
-    category: "system",
-    react: "⚙️",
-    filename: __filename
-}, async (conn, mek, m, { from, reply, isOwner }) => {
-    try {
-        // Owner or BOT_NUMBER check
-        if (!isOwner && from !== config.BOT_NUMBER) 
-            return reply("🚫 *Owner Only Command!*");
-
-        // ===== Menu Text =====
-        const envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
-├─ Name: RANUMITHA-X-MD
-├─ Prefix: ${config.PREFIX}
-├─ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
-├─ Version: ${config.BOT_VERSION}
-└─ Mode: ${config.MODE.toUpperCase()}
-
-> Reply with numbers (e.g. 1.1 / 2.1) or type 'exit' to close.`;
-
-        // ===== Send Image =====
-        await conn.sendMessage(from, {
-            image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
-            caption: envSettings
-        }, { quoted: mek });
-
-        // ===== Send Audio =====
-        await conn.sendMessage(from, {
-            audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
-            mimetype: 'audio/mp4',
-            ptt: true
-        }, { quoted: mek });
-
-        // ===== Reply Handler =====
-        const handler = async (msgUpdate) => {
-            try {
-                const msg = msgUpdate.messages[0];
-                if (!msg.message || msg.key.fromMe) return;
-
-                const sender = msg.key.remoteJid;
-                const text = (msg.message.conversation || msg.message.extendedTextMessage?.text || "").trim();
-
-                // Only owner or BOT_NUMBER can reply
-                if (!isOwner && sender !== config.BOT_NUMBER) return;
-
-                if (text.toLowerCase() === "exit") {
-                    await reply("⚙️ Env menu closed.");
-                    conn.ev.off('messages.upsert', handler);
-                    return;
-                }
-
-                if (envReplies[text]) {
-                    // React to message
-                    await conn.sendMessage(sender, { react: { text: "✅", key: msg.key } });
-                    // Reply text
-                    await reply(envReplies[text]);
-                }
-            } catch (err) {
-                console.error("Reply handler error:", err);
-            }
-        };
-
-        // ===== Add listener =====
-        conn.ev.on('messages.upsert', handler);
-
-    } catch (e) {
-        console.error(e);
-        reply("❌ Error while loading env settings!");
-    }
-});
