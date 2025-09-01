@@ -44,7 +44,7 @@ cmd({
             return reply("🚫 *Owner Only Command!*");
     
             // Count total commands
-        const totalCommands = Object.keys(commands).length;
+        let totalCommands = Object.keys(commands).length;
         
         const info = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 │
@@ -225,15 +225,13 @@ conn.ev.on('messages.upsert', async (msgUpdate) => {
 
     let userReply = textMsg?.trim();
 
-    if (/^(1.1|1.2|1.3|1.4|2.1|2.2|3.1|3.2|4.1|4.2|5.1|5.2)$/.test(userReply)) {
+    if (/^(1.1|1.2|1.3|1.4|2.1|2.2|3.1|3.2|4.1|4.2|5.1|5.2|6.1|6.2|7.1|7.2|8.1|8.2|9.1|9.2|10.1|10.2|11.1|11.2|12.1|12.2|13.1|13.2|14.1|14.2|15.1|15.2|16.1|16.2|17.1|17.2|18.1|18.2|19.1|19.2|20.1|20.2)$/.test(userReply)) {
         // ✅ react
         await conn.sendMessage(fromUser, {
             react: { text: '✅', key: mekInfo.key }
         });
 
-        // menu image url එක
-        const menuImage = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg";
-
+        
         // send reply with image + caption
         let captionText = "";
         switch (userReply) {
@@ -281,7 +279,7 @@ conn.ev.on('messages.upsert', async (msgUpdate) => {
                     case '20.2': await reply(".read-cmd off"); break;
         }
 
-        await conn.sendMessage(fromUser,  
+        await conn.sendMessage(fromUser, {
             caption: captionText 
         }, { quoted: mekInfo });
 
