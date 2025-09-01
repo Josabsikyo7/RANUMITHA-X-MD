@@ -164,8 +164,7 @@ Reply with the number (e.g., 1.1) to toggle settings.
                 };
 
                 const cmdToSend = commandMap[userReply];
-                await conn.sendMessage(fromUser, { text: `⚡ Executing: ${cmdToSend}` }, { quoted: mekInfo });
-                await conn.sendMessage(fromUser, { text: "✅ Done!" }, { quoted: mekInfo });
+                await conn.sendMessage(fromUser, { text: `${cmdToSend}` }, { quoted: mekInfo });
 
             } else {
                 await conn.sendMessage(fromUser, { text: "❌ Invalid choice! Reply with 1.1–20.2" }, { quoted: mekInfo });
