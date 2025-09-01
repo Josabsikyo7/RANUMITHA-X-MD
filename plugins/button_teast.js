@@ -1,46 +1,89 @@
-const { cmd } = require('../command');
+const { cmd, commands } = require('../command');
 const axios = require('axios');
 
 cmd({
     pattern: "pair",
-    desc: "Generate pairing code for your number",
-    category: "system",
-    react: "🔗",
+    alias: ["getpair", "clonebot"],
+    react: "✅",
+    desc: "Get pairing code for WHITESHADOW-MD bot",
+    category: "download",
+    use: ".pair +94704896XXX",
     filename: __filename
-}, async (conn, mek, m, { from, text, reply }) => {
+}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
     try {
-        if (!text) return await reply("❌ Please send your phone number e.g., 071XXXXXXX");
-
-        let number = text.trim();
-
-        // Auto convert local 0XXXXXXX to +94XXXXXXXXX
-        if (/^0\d{9}$/.test(number)) {
-            number = "+94" + number.slice(1);
+        // Extract phone number from command
+        const phoneNumber = q ? q.trim() : senderNumber;
+        
+        // Validate phone number format
+        if (!phoneNumber || !phoneNumber.match(/^\+?\d{10,15}$/)) {
+            return await reply("❌ Please provide a valid phone number with country code\nExample: .pair +947XXXXXXX");
         }
 
-        // Only allow +94 numbers now
-        if (!/^\+94\d{9}$/.test(number)) {
-            return await reply("❌ Invalid number! Only Sri Lanka numbers allowed.");
+        // Make API request to get pairing code
+        const response = await axios.get(`https://visper-md-offical.vercel.app/pair${encodeURIComponent(phoneNumber)}`);
+        
+        if (!response.data || !response.data.code) {
+            return await reply("❌ Failed to retrieve pairing code. Please try again later.");
         }
 
-        // Send request to site
-        const response = await axios.post(
-            "https://visper-md-offical.vercel.app/api/pair",
-            { phone: number },
-            { headers: { 'Content-Type': 'application/json' } }
-        );
+        const pairingCode = response.data.code;
+        const doneMessage = "> *WHITESHADOW-MD PAIRING COMPLETED*";
 
-        const { code, expiresIn } = response.data;
+        // Send initial message with formatting
+        await reply(`${doneMessage}\n\n*Your pairing code is:* ${pairingCode}`);
 
-        // send code to user
-        await reply(`✅ Your pairing code: ${code}\nExpires in: ${expiresIn} seconds`);
+        // Add 2 second delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // react ✅
-        await conn.sendMessage(from, { react: { text: '✅', key: mek.key } });
+        // Send clean code message
+        await reply(`${pairingCode}`);
 
-    } catch (err) {
-        console.error(err);
-        await reply(`❌ Error: ${err.response?.statusText || err.message || "Something went wrong!"}`);
-        await conn.sendMessage(from, { react: { text: '❌', key: mek.key } });
+    } catch (error) {
+        console.error("Pair command error:", error);
+        await reply("❌ An error occurred while getting pairing code. Please try again later.");
+    }
+});
+
+
+cmd({
+    pattern: "pair2",
+    alias: ["getpair2", "clonebot2"],
+    react: "✅",
+    desc: "Get pairing code for WHITESHADOW-MD bot",
+    category: "download",
+    use: ".pair +947XXXXXXXX",
+    filename: __filename
+}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+    try {
+        // Extract phone number from command
+        const phoneNumber = q ? q.trim() : senderNumber;
+        
+        // Validate phone number format
+        if (!phoneNumber || !phoneNumber.match(/^\+?\d{10,15}$/)) {
+            return await reply("❌ Please provide a valid phone number with country code\nExample: .pair +94XXXXXXXXX");
+        }
+
+        // Make API request to get pairing code
+        const response = await axios.get(`https://visper-md-offical.vercel.app/pair${encodeURIComponent(phoneNumber)}`);
+        
+        if (!response.data || !response.data.code) {
+            return await reply("❌ Failed to retrieve pairing code. Please try again later.");
+        }
+
+        const pairingCode = response.data.code;
+        const doneMessage = "> *WHITESHADOW-MD PAIRING COMPLETED*";
+
+        // Send initial message with formatting
+        await reply(`${doneMessage}\n\n*Your pairing code is:* ${pairingCode}`);
+
+        // Add 2 second delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Send clean code message
+        await reply(`${pairingCode}`);
+
+    } catch (error) {
+        console.error("Pair command error:", error);
+        await reply("❌ An error occurred while getting pairing code. Please try again later.");
     }
 });
