@@ -31,7 +31,7 @@ cmd({
 > Reply with numbers (e.g. 1.1 / 2.1) or type 'exit' to close.`;
 
         // Send menu image
-        const menuMsg = await conn.sendMessage(from, {
+        await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: mek });
@@ -39,7 +39,7 @@ cmd({
         // Send menu audio
         await conn.sendMessage(from, {
             audio: { url: "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3" },
-            mimetype: 'audio/mp4',
+            mimetype: 'audio/mpeg',
             ptt: true
         }, { quoted: mek });
 
@@ -49,7 +49,7 @@ cmd({
                 const msg = msgUpdate.messages[0];
                 if (!msg.message) return;
 
-                // ✅ Support conversation + extendedTextMessage
+                // Support conversation + extendedTextMessage
                 let text = msg.message.conversation
                         || msg.message.extendedTextMessage?.text;
                 if (!text) return;
@@ -61,67 +61,30 @@ cmd({
                     return reply("🚫 *Owner Only Command!*");
                 }
 
-                // ✅ react for valid number
-                if (/^(\d{1.1,1.2,1.3,1.4}\.\d)$/.test(text)) {
+                // ✅ Valid number regex for only specific options
+                if (/^(1\.1|1\.2|1\.3|1\.4|2\.1|2\.2|3\.1|3\.2)$/.test(text)) {
+                    // react ✅
                     await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
                 }
 
                 // --- Handle menu numbers ---
                 switch (text) {
-                    case '1.1': await reply("✅ Public Mode enabled"); break;
-                    case '1.2': await reply("✅ Private Mode enabled"); break;
-                    case '1.3': await reply("✅ Group Mode enabled"); break;
-                    case '1.4': await reply("✅ Inbox Mode enabled"); break;
-                    case '2.1': await reply("✅ Auto Recording ON"); break;
-                    case '2.2': await reply("❌ Auto Recording OFF"); break;
-                    case '3.1': await reply("✅ Auto Typing ON"); break;
-                    case '3.2': await reply("❌ Auto Typing OFF"); break;
-                    case '4.1': await reply("✅ Always Online ON"); break;
-                    case '4.2': await reply("❌ Always Online OFF"); break;
-                    case '5.1': await reply("✅ Public Mod ON"); break;
-                    case '5.2': await reply("❌ Public Mod OFF"); break;
-                    case '6.1': await reply("✅ Auto Voice ON"); break;
-                    case '6.2': await reply("❌ Auto Voice OFF"); break;
-                    case '7.1': await reply("✅ Auto Sticker ON"); break;
-                    case '7.2': await reply("❌ Auto Sticker OFF"); break;
-                    case '8.1': await reply("✅ Auto Reply ON"); break;
-                    case '8.2': await reply("❌ Auto Reply OFF"); break;
-                    case '9.1': await reply("✅ Auto React ON"); break;
-                    case '9.2': await reply("❌ Auto React OFF"); break;
-                    case '10.1': await reply("✅ Auto Status Seen ON"); break;
-                    case '10.2': await reply("❌ Auto Status Seen OFF"); break;
-                    case '11.1': await reply("✅ Auto Status Reply ON"); break;
-                    case '11.2': await reply("❌ Auto Status Reply OFF"); break;
-                    case '12.1': await reply("✅ Auto Status React ON"); break;
-                    case '12.2': await reply("❌ Auto Status React OFF"); break;
-                    case '13.1': await reply("✅ Custom React ON"); break;
-                    case '13.2': await reply("❌ Custom React OFF"); break;
-                    case '14.1': await reply("✅ Anti VV ON"); break;
-                    case '14.2': await reply("❌ Anti VV OFF"); break;
-                    case '15.1': await reply("✅ Welcome ON"); break;
-                    case '15.2': await reply("❌ Welcome OFF"); break;
-                    case '16.1': await reply("✅ Admin Events ON"); break;
-                    case '16.2': await reply("❌ Admin Events OFF"); break;
-                    case '17.1': await reply("✅ Anti Link ON"); break;
-                    case '17.2': await reply("❌ Anti Link OFF"); break;
-                    case '18.1': await reply("✅ Read Message ON"); break;
-                    case '18.2': await reply("❌ Read Message OFF"); break;
-                    case '19.1': await reply("✅ Anti Bad ON"); break;
-                    case '19.2': await reply("❌ Anti Bad OFF"); break;
-                    case '20.1': await reply("✅ Anti Link Kick ON"); break;
-                    case '20.2': await reply("❌ Anti Link Kick OFF"); break;
-                    case '21.1': await reply("✅ Read CMD ON"); break;
-                    case '21.2': await reply("❌ Read CMD OFF"); break;
+                    case '1.1': await conn.sendMessage(from, { text: "✅ Public Mode enabled", quoted: msg }); break;
+                    case '1.2': await conn.sendMessage(from, { text: "✅ Private Mode enabled", quoted: msg }); break;
+                    case '1.3': await conn.sendMessage(from, { text: "✅ Group Mode enabled", quoted: msg }); break;
+                    case '1.4': await conn.sendMessage(from, { text: "✅ Inbox Mode enabled", quoted: msg }); break;
+                    case '2.1': await conn.sendMessage(from, { text: "✅ Auto Recording ON", quoted: msg }); break;
+                    case '2.2': await conn.sendMessage(from, { text: "❌ Auto Recording OFF", quoted: msg }); break;
+                    case '3.1': await conn.sendMessage(from, { text: "✅ Auto Typing ON", quoted: msg }); break;
+                    case '3.2': await conn.sendMessage(from, { text: "❌ Auto Typing OFF", quoted: msg }); break;
 
                     case 'exit':
-                        await reply("✅ Settings menu closed.");
+                        await conn.sendMessage(from, { text: "✅ Settings menu closed.", quoted: msg });
                         conn.ev.off('messages.upsert', handler);
                         return;
 
                     default:
-                        if (/^(\d{1.1,1.2,1.3,1.4}\.\d)$/.test(text)) {
-                            await reply("❌ Invalid option, please select correctly.");
-                        }
+                        await conn.sendMessage(from, { text: "❌ Invalid option, please select a valid number.", quoted: msg });
                 }
             } catch (err) {
                 console.error("Handler error:", err);
