@@ -13,7 +13,7 @@ cmd({
     category: "system",
     react: "⚙️",
     filename: __filename
-}, async (conn, mek, m, { from, reply, isOwner }) => {
+}, async (conn, mek, m, { from, reply, isOwner, isCreator }) => {
     try {
         if (!isOwner) return reply("🚫 *Owner Only Command!*");
 
@@ -105,7 +105,7 @@ cmd({
                 }
 
                 // Only owner can trigger number replies
-                if (!isOwner) return;
+                if (!isCreator) return;
 
                 // Strict number validation regex
                 if (/^(1\.1|1\.2|1\.3|1\.4|2\.1|2\.2|3\.1|3\.2|4\.1|4\.2|5\.1|5\.2|6\.1|6\.2|7\.1|7\.2|8\.1|8\.2|9\.1|9\.2|10\.1|10\.2|11\.1|11\.2|12\.1|12\.2|13\.1|13\.2|14\.1|14\.2|15\.1|15\.2|16\.1|16\.2|17\.1|17\.2|18\.1|18\.2|19\.1|19\.2|20\.1|20\.2|21\.1|21\.2)$/.test(text)) {
