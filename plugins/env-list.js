@@ -1,6 +1,11 @@
 const config = require('../config');
 const { cmd } = require('../command');
 
+// Helper function to check boolean envs
+function isEnabled(value) {
+    return value && value.toString().toLowerCase() === "true";
+}
+
 cmd({
     pattern: "env",
     alias: ["config", "settings", "setting"],
@@ -10,19 +15,23 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply, isOwner }) => {
     try {
-        if (!isOwner) return reply("🚫 Only Owner Can Use This Command!");
+        // --- Owner Check before showing menu ---
+        if (!isOwner) {
+            return reply("🚫 *Owner Only Command!*");
+        }
 
-        const envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
+        // Menu text
+        let envSettings = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
 ├─ Name: RANUMITHA-X-MD
 ├─ Prefix: ${config.PREFIX}
 ├─ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
 ├─ Version: ${config.BOT_VERSION}
 └─ Mode: ${config.MODE.toUpperCase()}
 
-> Reply with numbers (e.g. 1.1 / 2.1).`;
+> Reply with numbers (e.g. 1.1 / 2.1) or type 'exit' to close.`;
 
         // Send menu image
-        await conn.sendMessage(from, {
+        const menuMsg = await conn.sendMessage(from, {
             image: { url: "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg" },
             caption: envSettings
         }, { quoted: mek });
@@ -34,81 +43,95 @@ cmd({
             ptt: true
         }, { quoted: mek });
 
-        // Map number to reply text
-        const menuReplies = {
-            '1.1': "Public Mode enabled",
-            '1.2': "Private Mode enabled",
-            '1.3': "Group Mode enabled",
-            '1.4': "Inbox Mode enabled",
-            '2.1': "Auto Recording ON",
-            '2.2': "Auto Recording OFF",
-            '3.1': "Auto Typing ON",
-            '3.2': "Auto Typing OFF",
-            '4.1': "Always Online ON",
-            '4.2': "Always Online OFF",
-            '5.1': "Public Mod ON",
-            '5.2': "Public Mod OFF",
-            '6.1': "Auto Voice ON",
-            '6.2': "Auto Voice OFF",
-            '7.1': "Auto Sticker ON",
-            '7.2': "Auto Sticker OFF",
-            '8.1': "Auto Reply ON",
-            '8.2': "Auto Reply OFF",
-            '9.1': "Auto React ON",
-            '9.2': "Auto React OFF",
-            '10.1': "Auto Status Seen ON",
-            '10.2': "Auto Status Seen OFF",
-            '11.1': "Auto Status Reply ON",
-            '11.2': "Auto Status Reply OFF",
-            '12.1': "Auto Status React ON",
-            '12.2': "Auto Status React OFF",
-            '13.1': "Custom React ON",
-            '13.2': "Custom React OFF",
-            '14.1': "Anti VV ON",
-            '14.2': "Anti VV OFF",
-            '15.1': "Welcome ON",
-            '15.2': "Welcome OFF",
-            '16.1': "Admin Events ON",
-            '16.2': "Admin Events OFF",
-            '17.1': "Anti Link ON",
-            '17.2': "Anti Link OFF",
-            '18.1': "Read Message ON",
-            '18.2': "Read Message OFF",
-            '19.1': "Anti Bad ON",
-            '19.2': "Anti Bad OFF",
-            '20.1': "Anti Link Kick ON",
-            '20.2': "Anti Link Kick OFF",
-            '21.1': "Read CMD ON",
-            '21.2': "Read CMD OFF"
+        // --- Number reply handler ---
+        const handler = async (msgUpdate) => {
+            try {
+                const msg = msgUpdate.messages[0];
+                if (!msg.message) return;
+
+                // ✅ Support conversation + extendedTextMessage
+                let text = msg.message.conversation
+                        || msg.message.extendedTextMessage?.text;
+                if (!text) return;
+
+                text = text.trim();
+
+                // --- Owner Only Check for number replies ---
+                if (!isOwner) {
+                    return reply("🚫 *Owner Only Command!*");
+                }
+
+                // ✅ react for valid number
+                if (/^(\d{1.1,1.2,1.3,1.4}\.\d)$/.test(text)) {
+                    await conn.sendMessage(from, { react: { text: "✅", key: msg.key } });
+                }
+
+                // --- Handle menu numbers ---
+                switch (text) {
+                    case '1.1': await reply("✅ Public Mode enabled"); break;
+                    case '1.2': await reply("✅ Private Mode enabled"); break;
+                    case '1.3': await reply("✅ Group Mode enabled"); break;
+                    case '1.4': await reply("✅ Inbox Mode enabled"); break;
+                    case '2.1': await reply("✅ Auto Recording ON"); break;
+                    case '2.2': await reply("❌ Auto Recording OFF"); break;
+                    case '3.1': await reply("✅ Auto Typing ON"); break;
+                    case '3.2': await reply("❌ Auto Typing OFF"); break;
+                    case '4.1': await reply("✅ Always Online ON"); break;
+                    case '4.2': await reply("❌ Always Online OFF"); break;
+                    case '5.1': await reply("✅ Public Mod ON"); break;
+                    case '5.2': await reply("❌ Public Mod OFF"); break;
+                    case '6.1': await reply("✅ Auto Voice ON"); break;
+                    case '6.2': await reply("❌ Auto Voice OFF"); break;
+                    case '7.1': await reply("✅ Auto Sticker ON"); break;
+                    case '7.2': await reply("❌ Auto Sticker OFF"); break;
+                    case '8.1': await reply("✅ Auto Reply ON"); break;
+                    case '8.2': await reply("❌ Auto Reply OFF"); break;
+                    case '9.1': await reply("✅ Auto React ON"); break;
+                    case '9.2': await reply("❌ Auto React OFF"); break;
+                    case '10.1': await reply("✅ Auto Status Seen ON"); break;
+                    case '10.2': await reply("❌ Auto Status Seen OFF"); break;
+                    case '11.1': await reply("✅ Auto Status Reply ON"); break;
+                    case '11.2': await reply("❌ Auto Status Reply OFF"); break;
+                    case '12.1': await reply("✅ Auto Status React ON"); break;
+                    case '12.2': await reply("❌ Auto Status React OFF"); break;
+                    case '13.1': await reply("✅ Custom React ON"); break;
+                    case '13.2': await reply("❌ Custom React OFF"); break;
+                    case '14.1': await reply("✅ Anti VV ON"); break;
+                    case '14.2': await reply("❌ Anti VV OFF"); break;
+                    case '15.1': await reply("✅ Welcome ON"); break;
+                    case '15.2': await reply("❌ Welcome OFF"); break;
+                    case '16.1': await reply("✅ Admin Events ON"); break;
+                    case '16.2': await reply("❌ Admin Events OFF"); break;
+                    case '17.1': await reply("✅ Anti Link ON"); break;
+                    case '17.2': await reply("❌ Anti Link OFF"); break;
+                    case '18.1': await reply("✅ Read Message ON"); break;
+                    case '18.2': await reply("❌ Read Message OFF"); break;
+                    case '19.1': await reply("✅ Anti Bad ON"); break;
+                    case '19.2': await reply("❌ Anti Bad OFF"); break;
+                    case '20.1': await reply("✅ Anti Link Kick ON"); break;
+                    case '20.2': await reply("❌ Anti Link Kick OFF"); break;
+                    case '21.1': await reply("✅ Read CMD ON"); break;
+                    case '21.2': await reply("❌ Read CMD OFF"); break;
+
+                    case 'exit':
+                        await reply("✅ Settings menu closed.");
+                        conn.ev.off('messages.upsert', handler);
+                        return;
+
+                    default:
+                        if (/^(\d{1.1,1.2,1.3,1.4}\.\d)$/.test(text)) {
+                            await reply("❌ Invalid option, please select correctly.");
+                        }
+                }
+            } catch (err) {
+                console.error("Handler error:", err);
+            }
         };
 
-        // Listen for number replies **once**
-        const numberHandler = async (msgUpdate) => {
-            const msg = msgUpdate.messages[0];
-            if (!msg.message) return;
+        conn.ev.on('messages.upsert', handler);
 
-            const sender = msg.key.participant || msg.key.remoteJid;
-            if (sender !== config.owner_number + "@s.whatsapp.net") return; // only owner can reply
-
-            const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
-            if (!text) return;
-
-            if (!/^\d+\.\d$/.test(text)) return;
-
-            const replyText = menuReplies[text] || `❌ Invalid option (${text})`;
-
-            // ✅ Reply directly to the number message
-            await conn.sendMessage(msg.key.remoteJid, { text: replyText, quoted: msg });
-
-            // ✅ React with checkmark
-            await conn.sendMessage(msg.key.remoteJid, { react: { text: "✅", key: msg.key } });
-        };
-
-        // Attach **once** to avoid duplicates
-        conn.ev.once('messages.upsert', numberHandler);
-
-    } catch (err) {
-        console.error("Env command error:", err);
-        reply(`❌ Error: ${err.message}`);
+    } catch (error) {
+        console.error('Env command error:', error);
+        reply(`❌ Error: ${error.message}`);
     }
 });
