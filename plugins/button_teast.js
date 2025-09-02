@@ -1,89 +1,96 @@
-const { cmd, commands } = require('../command');
-const axios = require('axios');
+const { cmd } = require('../command');
+const translate = require('@vitalets/google-translate-api');
 
+// Pending translations memory
+let pendingTranslate = {};
+
+// Language map
+const langMap = {
+  "1": "si",       // Sinhala
+  "2": "en",       // English
+  "3": "hi",       // Hindi
+  "4": "ta",       // Tamil
+  "5": "ar",       // Arabic
+  "6": "fr",       // French
+  "7": "de",       // German
+  "8": "ja",       // Japanese
+  "9": "zh-cn",    // Chinese
+  "10": "ru"       // Russian
+};
+
+const langMenu = `
+🌍 *Select Language Number to Translate:*
+
+1. 🇱🇰 Sinhala
+2. 🇬🇧 English
+3. 🇮🇳 Hindi
+4. 🇱🇰 Tamil
+5. 🇸🇦 Arabic
+6. 🇫🇷 French
+7. 🇩🇪 German
+8. 🇯🇵 Japanese
+9. 🇨🇳 Chinese
+10. 🇷🇺 Russian
+
+👉 Reply with number (1–10) after typing your text.
+`;
+
+// Step 1: .translate command
 cmd({
-    pattern: "pair",
-    alias: ["getpair", "clonebot"],
-    react: "✅",
-    desc: "Get pairing code for WHITESHADOW-MD bot",
-    category: "download",
-    use: ".pair +94704896XXX",
-    filename: __filename
-}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        // Extract phone number from command
-        const phoneNumber = q ? q.trim() : senderNumber;
-        
-        // Validate phone number format
-        if (!phoneNumber || !phoneNumber.match(/^\+?\d{10,15}$/)) {
-            return await reply("❌ Please provide a valid phone number with country code\nExample: .pair +947XXXXXXX");
-        }
+  pattern: "translate",
+  desc: "Translate text to selected language",
+  category: "tools",
+  react: "🌍",
+  filename: __filename
+}, async (conn, mek, m, { from, sender }) => {
+  const text = m.text.trim().split(" ").slice(1).join(" ");
+  if (!text) {
+    return await conn.sendMessage(from, { 
+      text: "✍️ Please enter text to translate.\n\nExample: *.translate Hello world*" 
+    }, { quoted: mek });
+  }
 
-        // Make API request to get pairing code
-        const response = await axios.get(`https://visper-md-offical.vercel.app/pair${encodeURIComponent(phoneNumber)}`);
-        
-        if (!response.data || !response.data.code) {
-            return await reply("❌ Failed to retrieve pairing code. Please try again later.");
-        }
+  // Save user pending translation
+  pendingTranslate[sender] = text;
 
-        const pairingCode = response.data.code;
-        const doneMessage = "> *WHITESHADOW-MD PAIRING COMPLETED*";
-
-        // Send initial message with formatting
-        await reply(`${doneMessage}\n\n*Your pairing code is:* ${pairingCode}`);
-
-        // Add 2 second delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Send clean code message
-        await reply(`${pairingCode}`);
-
-    } catch (error) {
-        console.error("Pair command error:", error);
-        await reply("❌ An error occurred while getting pairing code. Please try again later.");
-    }
+  // Send language menu
+  await conn.sendMessage(from, { text: langMenu }, { quoted: mek });
 });
 
-
+// Step 2: Handle language number reply
 cmd({
-    pattern: "pair2",
-    alias: ["getpair2", "clonebot2"],
-    react: "✅",
-    desc: "Get pairing code for WHITESHADOW-MD bot",
-    category: "download",
-    use: ".pair +947XXXXXXXX",
-    filename: __filename
-}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        // Extract phone number from command
-        const phoneNumber = q ? q.trim() : senderNumber;
-        
-        // Validate phone number format
-        if (!phoneNumber || !phoneNumber.match(/^\+?\d{10,15}$/)) {
-            return await reply("❌ Please provide a valid phone number with country code\nExample: .pair +94XXXXXXXXX");
-        }
+  on: "text"
+}, async (conn, mek, m, { from, sender }) => {
+  const userChoice = m.text.trim();
 
-        // Make API request to get pairing code
-        const response = await axios.get(`https://visper-md-offical.vercel.app/pair${encodeURIComponent(phoneNumber)}`);
-        
-        if (!response.data || !response.data.code) {
-            return await reply("❌ Failed to retrieve pairing code. Please try again later.");
-        }
+  // Check if user has pending translation
+  if (!pendingTranslate[sender]) return;
 
-        const pairingCode = response.data.code;
-        const doneMessage = "> *WHITESHADOW-MD PAIRING COMPLETED*";
+  const lang = langMap[userChoice];
+  if (!lang) {
+    return await conn.sendMessage(from, { 
+      text: "❌ Invalid choice! Please reply with a number 1–10." 
+    }, { quoted: mek });
+  }
 
-        // Send initial message with formatting
-        await reply(`${doneMessage}\n\n*Your pairing code is:* ${pairingCode}`);
+  const textToTranslate = pendingTranslate[sender];
 
-        // Add 2 second delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
+  try {
+    // Translate text
+    const res = await translate(textToTranslate, { to: lang });
 
-        // Send clean code message
-        await reply(`${pairingCode}`);
+    // Send translated text
+    await conn.sendMessage(from, { 
+      text: `✅ *Translated (${lang})*\n\n${res.text}` 
+    }, { quoted: mek });
 
-    } catch (error) {
-        console.error("Pair command error:", error);
-        await reply("❌ An error occurred while getting pairing code. Please try again later.");
-    }
+  } catch (error) {
+    console.error("Translation Error:", error);
+    await conn.sendMessage(from, { 
+      text: "⚠️ Translation failed!\n\n" + error.message 
+    }, { quoted: mek });
+  }
+
+  // Clear pending translation for this user
+  delete pendingTranslate[sender];
 });
