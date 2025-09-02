@@ -1,7 +1,8 @@
 const config = require('../config');
 const { cmd, commands } = require('../command');
 const { runtime } = require('../lib/functions');
-const os = require("os");
+const axios = require('axios');
+const os = require("os")
 
 // Fake vCard
 const fakevCard = {
@@ -40,59 +41,150 @@ cmd({
 
         // Settings menu text
         const info = `╭─『 ⚙️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 𝗠𝗘𝗡𝗨 ⚙️ 』───❏
-│ Bot: RANUMITHA-X-MD
-│ Owner: ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
-│ Prefix: ${config.PREFIX}
-│ Version: ${config.BOT_VERSION}
-╰───────────────
-1.1 Public
-1.2 Private
-1.3 Group
-1.4 Inbox
-2.1 Auto Recording On
-2.2 Auto Recording Off
-3.1 Auto Typing On
-3.2 Auto Typing Off
-4.1 Always Online On
-4.2 Always Online Off
-5.1 Public Mode On
-5.2 Public Mode Off
-6.1 Auto Voice On
-6.2 Auto Voice Off
-7.1 Auto Sticker On
-7.2 Auto Sticker Off
-8.1 Auto Reply On
-8.2 Auto Reply Off
-9.1 Auto React On
-9.2 Auto React Off
-10.1 Auto Status Seen On
-10.2 Auto Status Seen Off
-11.1 Status Reply On
-11.2 Status Reply Off
-12.1 Status React On
-12.2 Status React Off
-13.1 Custom React On
-13.2 Custom React Off
-14.1 Anti VV On
-14.2 Anti VV Off
-15.1 Welcome On
-15.2 Welcome Off
-16.1 Anti Link On
-16.2 Anti Link Off
-17.1 Read Message On
-17.2 Read Message Off
-18.1 Anti Bad On
-18.2 Anti Bad Off
-19.1 Anti Link Kick On
-19.2 Anti Link Kick Off
-20.1 Read CMD On
-20.2 Read CMD Off
+│
+├─❏ *🔖 BOT INFO*
+├─∘ *Name:* RANUMITHA-X-MD
+├─∘ *Prefix:* ${config.PREFIX}
+├─∘ *Owner:* ᴴᴵᴿᵁᴷᴬ ᴿᴬᴺᵁᴹᴵᵀᴴᴬ
+├─∘ *Number:* ${config.OWNER_NUMBER}
+└─∘ *Version:* ${config.BOT_VERSION}
+    
+      ╭─ 🛡️ 𝗦𝗘𝗧𝗧𝗜𝗡𝗚𝗦 🛡️ ─╮
+╭───────────────────╮
+│ SELECT WORK MODE *${config.MODE.toUpperCase()}*  |
+╰───────────────────╯ 
+│ ┣ 1.1  Public  
+│ ┣ 1.2  Private 
+│ ┣ 1.3  Group   
+│ ┗ 1.4  Inbox
+│
+╭──────────────────╮
+│ Auto Recording: ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}                 |
+╰──────────────────╯ 
+│ ┣ 2.1  true  ✅ 
+│ ┗ 2.2  false ❌
+│
+╭──────────────────╮
+│ Auto Typing: ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}                        |
+╰──────────────────╯ 
+│ ┣ 3.1  true  ✅ 
+│ ┗ 3.2  false ❌
+│
+╭──────────────────╮
+│ Always Online: ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}                    |
+╰──────────────────╯ 
+│ ┣ 4.1  true  ✅ 
+│ ┗ 4.2  false ❌
+│
+╭──────────────────╮
+│ Public Mod: ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}                         |
+╰──────────────────╯ 
+│ ┣ 5.1  true  ✅ 
+│ ┗ 5.2  false ❌
+│
+╭──────────────────╮
+│ Auto Voice: ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+│ ┣ 6.1  true  ✅ 
+│ ┗ 6.2  false ❌
+│
+╭──────────────────╮
+│ Auto Sticker: ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}                       |
+╰──────────────────╯ 
+│ ┣ 7.1  true  ✅ 
+│ ┗ 7.2  false ❌
+│
+╭──────────────────╮
+│ Auto Reply: ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+│ ┣ 8.1  true  ✅ 
+│ ┗ 8.2  false ❌
+│
+╭──────────────────╮
+│ Auto React: ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}                         |
+╰──────────────────╯ 
+│ ┣ 9.1  true  ✅ 
+│ ┗ 9.2  false ❌
+│
+╭──────────────────╮
+│ Auto Status Seen: ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}              |
+╰──────────────────╯ 
+│ ┣ 10.1  true  ✅ 
+│ ┗ 10.2  false ❌
+│
+╭──────────────────╮
+│ Auto Status Reply: ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}             |
+╰──────────────────╯ 
+│ ┣ 11.1  true  ✅ 
+│ ┗ 11.2  false ❌
+│
+╭──────────────────╮
+│ Auto Status React: ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}             |
+╰──────────────────╯ 
+│ ┣ 12.1  true  ✅ 
+│ ┗ 12.2 false ❌
+│
+╭──────────────────╮
+│ Custom React: ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}                   |
+╰──────────────────╯ 
+│ ┣ 13.1  true  ✅ 
+│ ┗ 13.2  false ❌
+│
+╭──────────────────╮
+│ Anti VV: ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}                                |
+╰──────────────────╯ 
+│ ┣ 14.1  true  ✅ 
+│ ┗ 14.2  false ❌
+│
+╭──────────────────╮
+│ Welcome: ${isEnabled(config.WELCOME) ? "✅" : "❌"}                            |
+╰──────────────────╯ 
+│ ┣ 15.1  true  ✅ 
+│ ┗ 15.2  false ❌
+│
+╭──────────────────╮
+│ Anti Link: ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}                              |
+╰──────────────────╯ 
+│ ┣ 16.1  true  ✅ 
+│ ┗ 16.2  false ❌
+│
+╭──────────────────╮
+│ Read Message: ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}                  |
+╰──────────────────╯ 
+│ ┣ 17.1  true  ✅ 
+│ ┗ 17.2  false ❌
+│
+╭──────────────────╮
+│ Anti Bad: ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}                              |
+╰──────────────────╯ 
+│ ┣ 18.1  true  ✅ 
+│ ┗ 18.2  false ❌
+│
+╭──────────────────╮
+│ Anti Link Kick: ${isEnabled(config.ANTI_LINK_KICK) ? "✅" : "❌"}                     |
+╰──────────────────╯ 
+│ ┣ 19.1  true  ✅ 
+│ ┗ 19.2  false ❌
+│
+╭──────────────────╮
+│ Read CMD: ${isEnabled(config.READ_CMD) ? "✅" : "❌"}                          |
+╰──────────────────╯ 
+│ ┣ 20.1  true  ✅ 
+│ ┗ 20.2  false ❌
+│
+│
+├─❏ *🦠 STATUS*
+│  ├─∘ Auto Status MSG: ${config.AUTO_STATUS_MSG}
+│  ├─∘ Custom React Emojis: ${config.CUSTOM_REACT_EMOJIS}
+│  ├─∘ Anti-Del Path: ${config.ANTI_DEL_PATH}
+│  └─∘ Dev Number: ${config.DEV}
+│
+╰──────────────────❏
 
-Reply with the number (e.g., 1.1) to toggle settings.
 > © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-        const image = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/IMG-20250711-WA0010.jpg";
-        const audioUrl = "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/menujs-audio.mp3";
+        const image = "https://raw.githubusercontent.com/Ranumithaofc/RANU-FILE-S-/refs/heads/main/images/Config%20img%20.jpg";
+        const audioUrl = "https://github.com/Ranumithaofc/RANU-FILE-S-/raw/refs/heads/main/Audio/envlist-music.mp3";
 
         // Send menu with image
         const sentMsg = await conn.sendMessage(from, { image: { url: image }, caption: info }, { quoted: fakevCard });
