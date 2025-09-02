@@ -1,21 +1,19 @@
 const { cmd } = require('../command');
 const translate = require('@vitalets/google-translate-api');
 
-// Pending translations memory
 let pendingTranslate = {};
 
-// Language map
 const langMap = {
-  "1": "si",       // Sinhala
-  "2": "en",       // English
-  "3": "hi",       // Hindi
-  "4": "ta",       // Tamil
-  "5": "ar",       // Arabic
-  "6": "fr",       // French
-  "7": "de",       // German
-  "8": "ja",       // Japanese
-  "9": "zh-cn",    // Chinese
-  "10": "ru"       // Russian
+  "1": "si",
+  "2": "en",
+  "3": "hi",
+  "4": "ta",
+  "5": "ar",
+  "6": "fr",
+  "7": "de",
+  "8": "ja",
+  "9": "zh-cn",
+  "10": "ru"
 };
 
 const langMenu = `
@@ -50,20 +48,15 @@ cmd({
     }, { quoted: mek });
   }
 
-  // Save user pending translation
   pendingTranslate[sender] = text;
-
-  // Send language menu
   await conn.sendMessage(from, { text: langMenu }, { quoted: mek });
 });
 
-// Step 2: Handle language number reply
+// Step 2: Handle reply
 cmd({
   on: "text"
 }, async (conn, mek, m, { from, sender }) => {
   const userChoice = m.text.trim();
-
-  // Check if user has pending translation
   if (!pendingTranslate[sender]) return;
 
   const lang = langMap[userChoice];
@@ -74,12 +67,9 @@ cmd({
   }
 
   const textToTranslate = pendingTranslate[sender];
-
   try {
-    // Translate text
     const res = await translate(textToTranslate, { to: lang });
 
-    // Send translated text
     await conn.sendMessage(from, { 
       text: `✅ *Translated (${lang})*\n\n${res.text}` 
     }, { quoted: mek });
@@ -87,10 +77,4 @@ cmd({
   } catch (error) {
     console.error("Translation Error:", error);
     await conn.sendMessage(from, { 
-      text: "⚠️ Translation failed!\n\n" + error.message 
-    }, { quoted: mek });
-  }
-
-  // Clear pending translation for this user
-  delete pendingTranslate[sender];
-});
+      text: "⚠️ Translation failed!\n\n
