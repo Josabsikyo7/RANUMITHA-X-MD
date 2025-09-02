@@ -1,110 +1,88 @@
-const config = require('../config');
 const { cmd } = require('../command');
-const axios = require("axios");
+const translate = require('@vitalets/google-translate-api');
 
-// Fake ChatGPT vCard
-const fakevCard = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-    },
-    message: {
-        contactMessage: {
-            displayName: "© Mr Hiruka",
-            vcard: `BEGIN:VCARD
-VERSION:3.0
-FN:Meta
-ORG:META AI;
-TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
-END:VCARD`
-        }
-    }
+let pendingTranslate = {};
+
+const langMap = {
+  "1": { code: "si", name: "Sinhala" },
+  "2": { code: "en", name: "English" },
+  "3": { code: "hi", name: "Hindi" },
+  "4": { code: "ta", name: "Tamil" },
+  "5": { code: "ar", name: "Arabic" },
+  "6": { code: "fr", name: "French" },
+  "7": { code: "de", name: "German" },
+  "8": { code: "ja", name: "Japanese" },
+  "9": { code: "zh-cn", name: "Chinese" },
+  "10": { code: "ru", name: "Russian" }
 };
 
-// Extract YouTube ID
-function getYouTubeId(url) {
-    const regex = /(?:v=|\/)([0-9A-Za-z_-]{11})(?:&|$)/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-}
+const langMenu = `
+🌍 *Select Language Number to Translate:*
 
-// ───────────── MP3 Downloader ─────────────
+1. 🇱🇰 Sinhala
+2. 🇬🇧 English
+3. 🇮🇳 Hindi
+4. 🇱🇰 Tamil
+5. 🇸🇦 Arabic
+6. 🇫🇷 French
+7. 🇩🇪 German
+8. 🇯🇵 Japanese
+9. 🇨🇳 Chinese
+10. 🇷🇺 Russian
+
+👉 Reply with number (1–10) after typing your text.
+`;
+
+// Step 1: translate command
 cmd({
-    pattern: "song",
-    alias: ["ytmp3", "mp3"],
-    react: "🎵",
-    desc: "Download YouTube MP3 as Document",
-    category: "download",
-    use: ".song <YouTube URL>",
-    filename: __filename
-}, async (conn, m, mek, { from, q, reply }) => {
-    try {
-        if (!q) return await reply("❌ Please provide a YouTube URL!");
-        const videoId = getYouTubeId(q);
-        if (!videoId) return await reply("❌ Invalid YouTube URL!");
+  pattern: "translate",
+  desc: "Translate text to selected language",
+  category: "tools",
+  react: "🌍",
+  filename: __filename
+}, async (conn, mek, m, { from, sender }) => {
+  const text = m.text.trim().split(" ").slice(1).join(" ");
+  if (!text) {
+    return await conn.sendMessage(from, { 
+      text: "✍️ Please enter text to translate.\n\nExample: *.translate Hello world*" 
+    }, { quoted: mek });
+  }
 
-        await reply("⏳ Processing your song...");
+  // save original text for user
+  pendingTranslate[sender] = text;
 
-        let apiUrl = `https://api.yt-download.org/api/button/mp3/${videoId}`;
-        let res = await axios.get(apiUrl).then(r => r.data).catch(() => null);
-
-        let downloadUrl = res?.url;
-        if (!downloadUrl) return await reply("❌ Failed to get MP3 link!");
-
-        let title = res?.title || `YouTube-Audio-${videoId}`;
-
-        await conn.sendMessage(from, {
-            document: { url: downloadUrl },
-            mimetype: "audio/mpeg",
-            fileName: `${title}.mp3`,
-            caption: `🎶 ${title}`
-        }, { quoted: fakevCard });
-
-        await reply("✅ Song Sent as Document!");
-
-    } catch (err) {
-        console.error(err);
-        await reply(`❌ Error: ${err.message}`);
-    }
+  await conn.sendMessage(from, { text: langMenu }, { quoted: mek });
 });
 
-// ───────────── MP4 Downloader ─────────────
+// Step 2: listen to reply
 cmd({
-    pattern: "video",
-    alias: ["ytmp4", "mp4"],
-    react: "📽️",
-    desc: "Download YouTube MP4 as Document",
-    category: "download",
-    use: ".video <YouTube URL>",
-    filename: __filename
-}, async (conn, m, mek, { from, q, reply }) => {
-    try {
-        if (!q) return await reply("❌ Please provide a YouTube URL!");
-        const videoId = getYouTubeId(q);
-        if (!videoId) return await reply("❌ Invalid YouTube URL!");
+  on: "text"
+}, async (conn, mek, m, { from, sender }) => {
+  if (!pendingTranslate[sender]) return;
 
-        await reply("⏳ Processing your video...");
+  const choice = m.text.trim();
+  const lang = langMap[choice];
+  if (!lang) {
+    return await conn.sendMessage(from, { 
+      text: "❌ Invalid choice! Please reply with number (1–10)." 
+    }, { quoted: mek });
+  }
 
-        let apiUrl = `https://api.yt-download.org/api/button/mp4/${videoId}`;
-        let res = await axios.get(apiUrl).then(r => r.data).catch(() => null);
+  const textToTranslate = pendingTranslate[sender];
+  delete pendingTranslate[sender]; // clear session
 
-        let downloadUrl = res?.url;
-        if (!downloadUrl) return await reply("❌ Failed to get MP4 link!");
+  try {
+    const res = await translate(textToTranslate, { to: lang.code });
 
-        let title = res?.title || `YouTube-Video-${videoId}`;
+    // ✅ send translated text to user
+    await conn.sendMessage(from, { 
+      text: `✅ *Translated to ${lang.name} (${lang.code})*\n\n${res.text}` 
+    }, { quoted: mek });
 
-        await conn.sendMessage(from, {
-            document: { url: downloadUrl },
-            mimetype: "video/mp4",
-            fileName: `${title}.mp4`,
-            caption: `📽️ ${title}`
-        }, { quoted: fakevCard });
-
-        await reply("✅ Video Sent as Document!");
-
-    } catch (err) {
-        console.error(err);
-        await reply(`❌ Error: ${err.message}`);
-    }
+  } catch (err) {
+    console.error("Translation Error:", err);
+    await conn.sendMessage(from, { 
+      text: "⚠️ Translation failed!\n\n" + err.message 
+    }, { quoted: mek });
+  }
 });
