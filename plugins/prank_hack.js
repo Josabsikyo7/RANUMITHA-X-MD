@@ -2,8 +2,8 @@ const config = require('../config');
 const { cmd, commands } = require('../command');
 
 cmd({
-    pattern: "hack",
-    alias: ["devicehack","fuckyourdevice", "fakehack","hacking"],
+    pattern: "prankhack",
+    alias: ["hackprank", "fakehack"],
     use: '.prankhack',
     desc: "Prank hacking simulation (harmless).",
     category: "fun",
@@ -46,7 +46,7 @@ async (conn, mek, m, { from, reply }) => {
             "🚨 HACKING COMPLETE — TARGET COMPROMISED!"
         ];
 
-        const baseDelay = 900; // milliseconds between messages
+        const baseDelay = 900; // ms between messages
 
         for (let i = 0; i < steps.length; i++) {
             ((text, delay) => {
