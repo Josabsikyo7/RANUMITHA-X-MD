@@ -2,7 +2,7 @@ const config = require('../config');
 const { cmd, commands } = require('../command');
 
 cmd({
-    pattern: "hack",
+    pattern: "prankhack",
     alias: ["hackprank", "fakehack"],
     use: '.prankhack',
     desc: "Prank hacking simulation (harmless).",
@@ -12,7 +12,6 @@ cmd({
 },
 async (conn, mek, m, { from, reply }) => {
     try {
-        // Smooth flickering progress bar
         function makeBar(percent) {
             const totalBlocks = 10;
             const filled = Math.floor(percent / 10);
@@ -24,33 +23,41 @@ async (conn, mek, m, { from, reply }) => {
             return `${bar} ${percent}%`;
         }
 
-        // Hacking phrases at key points
+        // Key hacking phrases + suspense lines
         const phrases = {
             0: "💻 Hacking started...",
             5: "🔍 Scanning Data Center...",
+            10:"⚠️ Suspicious activity detected...",
             15: "🛡️ Firewall breached",
-            25: "🌐 Connecting to remote server...",
-            35: "📁 Accessing database...",
-            45: "💾 Dumping sensitive data...",
-            55: "✅ Database saved",
-            65: "📤 Uploading to control server...",
-            75: "🖥️ Root access granted",
-            85: "⚡ Power Override Enabled",
-            95: "🧹 Cleaning logs and traces...",
+            20: "🌐 Connecting to remote server...",
+            25: "📁 Accessing database...",
+            30: "⏳ Waiting for response...",
+            35: "💾 Dumping sensitive data...",
+            40: "✅ Database saved",
+            45: "🚀 Uploading to control server...",
+            50: "🖥️ Root access granted",
+            60: "⚡ Power Override Enabled",
+            70: "🧹 Cleaning logs and traces...",
+            80: "🔒 Finalizing exploit...",
+            90: "💣 Extracting critical files...",
+            95: "🕵️ Data verification in progress...",
             100:"🚨 HACKING COMPLETE — TARGET COMPROMISED!"
         };
 
-        // Generate steps 0 → 100% by 2% increments
+        // Generate 0 → 100% steps (1–2% increments)
         const steps = [];
         for(let i=0; i<=100; i+=2){
-            if(phrases[i]) steps.push(`${phrases[i]} ${makeBar(i)}`);
-            else steps.push(makeBar(i));
+            let phrase = phrases[i] ? phrases[i] : "";
+            // Random flickering effect
+            let flicker = Math.random() > 0.7 ? "▒" : "";
+            steps.push(`${phrase} ${makeBar(i)}${flicker}`.trim());
         }
+        steps.push("🚨 HACKING COMPLETE — TARGET COMPROMISED!");
 
         // Send initial message
         let sentMsg = await conn.sendMessage(from, { text: steps[0] }, { quoted: mek });
 
-        const baseDelay = 350; // adjust speed: lower = faster
+        const baseDelay = 300; // ms between edits, adjust for speed
         for(let i=1; i<steps.length; i++){
             ((text, delay) => {
                 setTimeout(async () => {
@@ -60,7 +67,7 @@ async (conn, mek, m, { from, reply }) => {
                             edit: sentMsg.key
                         });
                     } catch(err){
-                        console.error("Failed to edit prank step:", err);
+                        console.error("Failed to edit step:", err);
                     }
                 }, delay);
             })(steps[i], i * baseDelay);
