@@ -17,22 +17,23 @@ async (conn, mek, m, { from, sender, reply }) => {
         const emojis = ['💀', '⚡'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // First reaction
+        // React with random emoji
         await conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
         });
 
-        // First message: "ping ! ! !"
-        await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
+        // First send: "ping ! ! !"
+        let sentMsg = await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
 
         // Calculate ping
-        const ping = Date.now() - startTime; 
+        const ping = Date.now() - startTime;
 
-        // Final message with result
-        const text = `*Ping: _${ping}ms_ ${randomEmoji}*`;
+        // Edit same message with ping result
+        const newText = `*Ping: _${ping}ms_ ${randomEmoji}*`;
 
         await conn.sendMessage(from, {
-            text,
+            edit: sentMsg.key,  // edit same message
+            text: newText,
             contextInfo: {
                 mentionedJid: [sender],
                 forwardingScore: 999,
@@ -43,7 +44,7 @@ async (conn, mek, m, { from, sender, reply }) => {
                     serverMessageId: 143
                 }
             }
-        }, { quoted: mek });
+        });
 
     } catch (e) {
         console.error("Error in ping command:", e);
