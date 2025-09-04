@@ -3,7 +3,7 @@ const { cmd, commands } = require('../command');
 
 cmd({
     pattern: "ping",
-    alias: ["speed", "pong", "ranuspeed", "ranuping", "ranumithaspeed", "ranumithaspeed"],
+    alias: ["speed", "pong", "ranuspeed", "ranuping", "ranumithaspeed"],
     use: '.ping',
     desc: "Check bot's response time.",
     category: "main",
@@ -17,14 +17,18 @@ async (conn, mek, m, { from, sender, reply }) => {
         const emojis = ['💀', '⚡'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-        // React with random emoji
+        // First reaction
         await conn.sendMessage(from, {
             react: { text: randomEmoji, key: mek.key }
         });
 
+        // First message: "ping ! ! !"
+        await conn.sendMessage(from, { text: "ping ! ! !" }, { quoted: mek });
+
+        // Calculate ping
         const ping = Date.now() - startTime; 
 
-        // Final message
+        // Final message with result
         const text = `*Ping: _${ping}ms_ ${randomEmoji}*`;
 
         await conn.sendMessage(from, {
