@@ -19,42 +19,51 @@ async (conn, mek, m, { from, reply }) => {
             return "█".repeat(filled) + "░".repeat(empty) + ` ${percent}%`;
         }
 
-        // 20 separate messages
         const steps = [
             "💻 Hacking started...",
+            makeBar(0),
             makeBar(5),
             "🔍 Scanning Data Center...",
             makeBar(10),
             "🛡️ Firewall breached",
-            makeBar(15),
+            makeBar(20),
             "🌐 Connecting to remote server...",
-            makeBar(25),
+            makeBar(30),
             "📁 Accessing database...",
-            makeBar(35),
+            makeBar(40),
             "💾 Dumping sensitive data...",
-            makeBar(45),
+            makeBar(50),
             "✅ Database saved",
-            makeBar(55),
+            makeBar(60),
             "📤 Uploading to control server...",
-            makeBar(65),
+            makeBar(70),
             "🖥️ Root access granted",
             makeBar(75),
             "⚡ Power Override Enabled",
-            makeBar(85),
+            makeBar(80),
             "🧹 Cleaning logs and traces...",
+            makeBar(90),
+            "🔒 Finalizing exploit...",
             makeBar(95),
+            makeBar(100),
             "🚨 HACKING COMPLETE — TARGET COMPROMISED!"
         ];
 
-        const baseDelay = 900; // ms between messages
+        // Send initial message
+        let sentMsg = await conn.sendMessage(from, { text: steps[0] }, { quoted: mek });
 
-        for (let i = 0; i < steps.length; i++) {
+        const baseDelay = 900; // milliseconds between edits
+
+        for (let i = 1; i < steps.length; i++) {
             ((text, delay) => {
                 setTimeout(async () => {
                     try {
-                        await conn.sendMessage(from, { text }, { quoted: mek });
+                        await conn.sendMessage(from, {
+                            text,
+                            edit: sentMsg.key
+                        });
                     } catch (err) {
-                        console.error("Failed to send prank step:", err);
+                        console.error("Failed to edit prank step:", err);
                     }
                 }, delay);
             })(steps[i], i * baseDelay);
