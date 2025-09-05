@@ -1,13 +1,13 @@
 const { cmd } = require('../command');
-const fg = require('api-dylux');
 const yts = require('yt-search');
-const ytdl = require('@distube/ytdl-core');  // fallback
+const ytdl = require('@distube/ytdl-core');
+const playdl = require('play-dl');
 
 cmd({
     pattern: "song",
     alias: ["songs", "ranusong", "asong", "play"],
     react: "🎵",
-    desc: "Download songs",
+    desc: "Download songs from YouTube",
     category: "download",
     filename: __filename
 },
@@ -18,6 +18,7 @@ async (conn, mek, m, {
         let q = args.join(" ");
         if (!q) return reply("❌ Please give me a YouTube URL or a song name!");
 
+        // 🔍 Search song
         const search = await yts(q);
         if (!search || !search.videos || search.videos.length === 0) {
             return reply("⚠️ No results found for your query!");
@@ -26,6 +27,7 @@ async (conn, mek, m, {
         const data = search.videos[0];
         const url = data.url;
 
+        // 📄 Description
         let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
 
 *Title:* ${data.title}
@@ -35,32 +37,46 @@ async (conn, mek, m, {
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-        // send thumbnail + details
+        // 🖼 Send thumbnail + details
         await conn.sendMessage(from, {
             image: { url: data.thumbnail },
             caption: desc
         }, { quoted: mek });
 
-        // Try api-dylux first
         let downloadUrl;
+
+        // 🎧 Try ytdl-core first
         try {
-            let down = await fg.yta(url);
-            downloadUrl = down.dl_url;
-        } catch (err) {
-            downloadUrl = null;
-        }
+            const info = await ytdl.getInfo(url, {
+                requestOptions: {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0',
+                        'Accept-Language': 'en-US,en;q=0.9'
+                    }
+                }
+            });
 
-        // If api-dylux failed → use ytdl-core
-        if (!downloadUrl) {
-            const info = await ytdl.getInfo(url);
             const format = ytdl.chooseFormat(info.formats, { filter: 'audioonly', quality: 'highestaudio' });
-            if (!format || !format.url) {
-                return reply("⚠️ Failed to download audio from YouTube!");
+            if (format && format.url) {
+                downloadUrl = format.url;
             }
-            downloadUrl = format.url;
+        } catch (err) {
+            console.log("ytdl-core failed:", err.message);
         }
 
-        // send audio
+        // 🔁 If ytdl-core fails → fallback to play-dl
+        if (!downloadUrl) {
+            try {
+                const yt_info = await playdl.video_info(url);
+                const stream = await playdl.stream_from_info(yt_info, { quality: 2 });
+                downloadUrl = stream.stream;
+            } catch (err) {
+                console.log("play-dl failed:", err.message);
+                return reply("⚠️ Failed to download audio!");
+            }
+        }
+
+        // 🎶 Send audio
         await conn.sendMessage(from, {
             audio: { url: downloadUrl },
             mimetype: "audio/mpeg"
