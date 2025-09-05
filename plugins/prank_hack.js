@@ -1,57 +1,46 @@
 const config = require('../config');
-const { cmd, commands } = require('../command');
+const { cmd } = require('../command');
 
 cmd({
-    pattern: "loard",
-    alias: ["hackprank", "fakehack"],
-    use: '.prankhack',
-    desc: "Prank hacking simulation (20-step messages).",
+    pattern: "nameedit",
+    alias: ["hirukaedit"],
+    use: '.nameedit',
+    desc: "Sequential text edit: Hiruka → Hiruka Ranumitha → Hiruka Ranumitha de Silva",
     category: "fun",
-    react: "💻",
+    react: "✍️",
     filename: __filename
 },
 async (conn, mek, m, { from, reply }) => {
     try {
-        function makeBar(percent) {
-            const totalBlocks = 20; // bar size
-            const filled = Math.floor((percent / 100) * totalBlocks);
-            const empty = totalBlocks - filled;
-            return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${percent}% ⏳`;
-        }
+        // Step 1: send first message
+        let sentMsg = await conn.sendMessage(from, { text: "Hiruka" }, { quoted: mek });
 
-        const steps = [
-            { p: 0,   msg: "💻 Hacking started..." },
-            { p: 5,   msg: "🔍 Scanning open ports..." },
-            { p: 10,  msg: "🛡️ Firewall bypassed..." },
-            { p: 15,  msg: "🌐 Connecting to server..." },
-            { p: 20,  msg: "📂 Accessing database..." },
-            { p: 30,  msg: "💾 Dumping data..." },
-            { p: 40,  msg: "📡 Uploading payload..." },
-            { p: 50,  msg: "⚡ Privilege escalation..." },
-            { p: 60,  msg: "🖥️ Root access granted..." },
-            { p: 70,  msg: "🔒 Encrypting channels..." },
-            { p: 80,  msg: "🧹 Cleaning traces..." },
-            { p: 90,  msg: "🚨 Finalizing exploit..." },
-            { p: 100, msg: "✅ HACKING COMPLETE — TARGET COMPROMISED!" }
-        ];
+        // Step 2: edit after 2s → Hiruka Ranumitha
+        setTimeout(async () => {
+            try {
+                await conn.sendMessage(from, {
+                    text: "Hiruka Ranumitha",
+                    edit: sentMsg.key
+                });
+            } catch (err) {
+                await conn.sendMessage(from, { text: "Hiruka Ranumitha" }, { quoted: mek });
+            }
+        }, 2000);
 
-        const baseDelay = 1000; // ms between messages
-
-        for (let i = 0; i < steps.length; i++) {
-            ((step, delay) => {
-                setTimeout(async () => {
-                    try {
-                        const text = `${step.msg}\n${makeBar(step.p)}`;
-                        await conn.sendMessage(from, { text }, { quoted: mek });
-                    } catch (err) {
-                        console.error("Send error:", err);
-                    }
-                }, delay);
-            })(steps[i], i * baseDelay);
-        }
+        // Step 3: edit after 4s → Hiruka Ranumitha de Silva
+        setTimeout(async () => {
+            try {
+                await conn.sendMessage(from, {
+                    text: "Hiruka Ranumitha de Silva",
+                    edit: sentMsg.key
+                });
+            } catch (err) {
+                await conn.sendMessage(from, { text: "Hiruka Ranumitha de Silva" }, { quoted: mek });
+            }
+        }, 4000);
 
     } catch (e) {
-        console.error("Error in prankhack command:", e);
+        console.error("Error in nameedit command:", e);
         reply(`Error: ${e.message}`);
     }
 });
