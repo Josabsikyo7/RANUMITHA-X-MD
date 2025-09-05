@@ -3,44 +3,45 @@ const { cmd } = require('../command');
 
 cmd({
     pattern: "nameedit",
-    alias: ["hirukaedit"],
+    alias: ["nameeditseq"],
     use: '.nameedit',
-    desc: "Sequential text edit: Hiruka → Hiruka Ranumitha → Hiruka Ranumitha de Silva",
+    desc: "Sequential text edit: Hiruka & Kasun",
     category: "fun",
     react: "✍️",
     filename: __filename
 },
 async (conn, mek, m, { from, reply }) => {
     try {
-        // Step 1: send first message
+        // Initial message
         let sentMsg = await conn.sendMessage(from, { text: "Hiruka" }, { quoted: mek });
 
-        // Step 2: edit after 2s → Hiruka Ranumitha
-        setTimeout(async () => {
-            try {
-                await conn.sendMessage(from, {
-                    text: "Hiruka Ranumitha",
-                    edit: sentMsg.key
-                });
-            } catch (err) {
-                await conn.sendMessage(from, { text: "Hiruka Ranumitha" }, { quoted: mek });
-            }
-        }, 2000);
+        // Timeline for edits
+        const steps = [
+            { text: "Hiruka Ranumitha", delay: 1000 },
+            { text: "Hiruka Ranumitha de Silva", delay: 2000 },
+            { text: "Kasun", delay: 3000 },
+            { text: "Kasun Kalhara", delay: 4000 },
+            { text: "Kasun Kalhara de Silva", delay: 5000 }
+        ];
 
-        // Step 3: edit after 4s → Hiruka Ranumitha de Silva
-        setTimeout(async () => {
-            try {
-                await conn.sendMessage(from, {
-                    text: "Hiruka Ranumitha de Silva",
-                    edit: sentMsg.key
-                });
-            } catch (err) {
-                await conn.sendMessage(from, { text: "Hiruka Ranumitha de Silva" }, { quoted: mek });
-            }
-        }, 4000);
+        // Sequential edits
+        for (let step of steps) {
+            ((txt, d) => {
+                setTimeout(async () => {
+                    try {
+                        await conn.sendMessage(from, {
+                            text: txt,
+                            edit: sentMsg.key
+                        });
+                    } catch (err) {
+                        await conn.sendMessage(from, { text: txt }, { quoted: mek });
+                    }
+                }, d);
+            })(step.text, step.delay);
+        }
 
     } catch (e) {
-        console.error("Error in nameedit command:", e);
+        console.error("Error in nameeditseq command:", e);
         reply(`Error: ${e.message}`);
     }
 });
