@@ -1,53 +1,56 @@
 const { cmd } = require('../command');
-const { exec } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const fg = require('sadaslk-dlcore');
+const yts = require('yt-search');
 
 cmd({
     pattern: "song",
     alias: ["songs", "ranusong", "asong", "play"],
     react: "🎵",
-    desc: "Download songs as MP3",
+    desc: "Download songs",
     category: "download",
     filename: __filename
 },
-async (conn, mek, m, { from, reply, args }) => {
+async (conn, mek, m, {
+    from, quoted, reply, body, isCmd, command, args, sender
+}) => {
     try {
-        const query = args.join(" ");
-        if (!query) return reply("❌ Please provide a YouTube link or song name!");
+        let q = args.join(" ");
+        if (!q) return reply("❌ Please give me a YouTube URL or a song name!");
 
-        // temporary filename
-        const fileName = `song_${Date.now()}.mp3`;
-        const filePath = path.join(__dirname, fileName);
+        const search = await yts(q);
+        const data = search.videos[0];
+        if (!data) return reply("⚠️ Song not found!");
 
-        reply("⏳ Downloading your song...");
+        const url = data.url;
 
-        // yt-dlp command: download best audio as mp3
-        const command = `yt-dlp -x --audio-format mp3 --audio-quality 0 -o "${filePath}" "${query}"`;
+        let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
 
-        exec(command, async (err, stdout, stderr) => {
-            if (err) {
-                console.log(err);
-                return reply("❌ Failed to download the song!");
-            }
+*Title:* ${data.title}
+*Description:* ${data.description || "N/A"}
+*Duration:* ${data.timestamp}
+*Uploaded:* ${data.ago}
+*Views:* ${data.views}
 
-            if (!fs.existsSync(filePath)) {
-                return reply("❌ Download failed, file not found!");
-            }
+> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-            // send audio to WhatsApp
-            await conn.sendMessage(from, {
-                audio: fs.readFileSync(filePath),
-                mimetype: "audio/mpeg",
-                fileName: fileName
-            }, { quoted: mek });
+        // send thumbnail + details
+        await conn.sendMessage(from, {
+            image: { url: data.thumbnail },
+            caption: desc
+        }, { quoted: mek });
 
-            // delete temporary file
-            fs.unlinkSync(filePath);
-        });
+        // download audio
+        let down = await fg.yta(url);
+        let downloadUrl = down.dl_url;
 
-    } catch (error) {
-        console.log(error);
-        reply(`❌ Error: ${error.message}`);
+        // send audio
+        await conn.sendMessage(from, {
+            audio: { url: downloadUrl },
+            mimetype: "audio/mpeg"
+        }, { quoted: mek });
+
+    } catch (e) {
+        console.log(e);
+        reply(`❌ Error: ${e.message}`);
     }
 });
