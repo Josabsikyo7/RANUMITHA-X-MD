@@ -40,7 +40,7 @@ async (conn, mek, m, {
         }, { quoted: mek });
 
         // download audio
-        let down = await fg.yta(url);
+        let down = await fg.yts(url);
         let downloadUrl = down.dl_url;
 
         // send audio
