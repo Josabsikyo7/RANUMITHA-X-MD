@@ -30,8 +30,8 @@ END:VCARD`
 };
 
 cmd({
-    pattern: "play1",
-    alias: ["mp3", "ytmp3", "song1"],
+    pattern: "play",
+    alias: ["song", "songs", "music"],
     react: "🎵",
     desc: "Download Ytmp3",
     category: "download",
