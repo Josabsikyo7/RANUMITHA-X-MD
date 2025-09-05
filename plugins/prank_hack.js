@@ -16,8 +16,8 @@ async (conn, mek, m, { from, reply }) => {
         let hirukaMsg = await conn.sendMessage(from, { text: "Hiruka" }, { quoted: mek });
 
         const hirukaSteps = [
-            { text: "Hiruka Ranumitha", delay: 2000 },
-            { text: "Hiruka Ranumitha de Silva", delay: 4000 }
+            { text: "Hiruka Ranumitha", delay: 500 },
+            { text: "Hiruka Ranumitha de Silva", delay: 1000 }
         ];
 
         for (let step of hirukaSteps) {
@@ -37,8 +37,8 @@ async (conn, mek, m, { from, reply }) => {
             let kasunMsg = await conn.sendMessage(from, { text: "Kasun" }, { quoted: mek });
 
             const kasunSteps = [
-                { text: "Kasun Kalhara", delay: 2000 },
-                { text: "Kasun Kalhara de Silva", delay: 4000 }
+                { text: "Kasun Kalhara", delay: 500 },
+                { text: "Kasun Kalhara de Silva", delay: 1000 }
             ];
 
             for (let step of kasunSteps) {
