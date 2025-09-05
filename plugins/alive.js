@@ -4,6 +4,7 @@ const os = require("os");
 const { runtime } = require('../lib/functions');
 
 // Fake META AI vCard
+
 const fakevCard = {
   key: {
     fromMe: false,
@@ -12,16 +13,17 @@ const fakevCard = {
   },
   message: {
     contactMessage: {
-      displayName: "AI • Status",
+      displayName: "Meta AI • Status",
       vcard: `BEGIN:VCARD
 VERSION:3.0
-FN:AI • Status
-ORG:© Mr Hiruka;
+FN:Meta AI • Status
+ORG:Meta AI;
 TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
 END:VCARD`
     }
   }
 };
+
 
 cmd({
     pattern: "alive",
