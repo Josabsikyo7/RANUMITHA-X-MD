@@ -1,6 +1,9 @@
 const { cmd } = require('../command');
 const yts = require('yt-search');
-const ytdl = require('ytdl-core'); // Add this package
+const ytdl = require('ytdl-core');
+const stream = require('stream');
+const { promisify } = require('util');
+const bufferStream = promisify(stream.pipeline);
 
 cmd({
     pattern: "song",
@@ -37,12 +40,21 @@ async (conn, mek, m, { from, quoted, reply, args }) => {
             caption: desc
         }, { quoted: mek });
 
-        // Download audio
-        const stream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio' });
+        // Download audio as buffer
+        const audioStream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio' });
+        const chunks = [];
+        audioStream.on('data', chunk => chunks.push(chunk));
 
-        // send as audio note (PTT)
+        await new Promise((resolve, reject) => {
+            audioStream.on('end', resolve);
+            audioStream.on('error', reject);
+        });
+
+        const audioBuffer = Buffer.concat(chunks);
+
+        // send as audio (PTT)
         await conn.sendMessage(from, {
-            audio: stream,
+            audio: audioBuffer,
             mimetype: 'audio/mpeg',
             ptt: true
         }, { quoted: mek });
