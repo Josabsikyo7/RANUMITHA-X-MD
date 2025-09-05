@@ -65,7 +65,7 @@ cmd({
     category: "fun",
     react: "💻",
     filename: __filename
-},
+    
 }, async (conn, mek, m, { from, isOwner, reply }) => {
     try {
         if (!isOwner) {
