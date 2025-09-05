@@ -1,66 +1,53 @@
 const { cmd } = require('../command');
-const yts = require('yt-search');
-const playdl = require('play-dl');
+const { exec } = require('child_process');
 const fs = require('fs');
-const { pipeline } = require('stream');
-const { promisify } = require('util');
-const streamPipeline = promisify(pipeline);
+const path = require('path');
 
 cmd({
     pattern: "song",
     alias: ["songs", "ranusong", "asong", "play"],
     react: "🎵",
-    desc: "Download songs from YouTube",
+    desc: "Download songs as MP3",
     category: "download",
     filename: __filename
 },
-async (conn, mek, m, {
-    from, quoted, reply, args
-}) => {
+async (conn, mek, m, { from, reply, args }) => {
     try {
-        let q = args.join(" ");
-        if (!q) return reply("❌ Please give me a YouTube URL or a song name!");
+        const query = args.join(" ");
+        if (!query) return reply("❌ Please provide a YouTube link or song name!");
 
-        // 🔍 Search
-        const search = await yts(q);
-        if (!search || !search.videos || search.videos.length === 0) {
-            return reply("⚠️ No results found!");
-        }
+        // temporary filename
+        const fileName = `song_${Date.now()}.mp3`;
+        const filePath = path.join(__dirname, fileName);
 
-        const data = search.videos[0];
-        const url = data.url;
+        reply("⏳ Downloading your song...");
 
-        // 🖼 Info msg
-        let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
+        // yt-dlp command: download best audio as mp3
+        const command = `yt-dlp -x --audio-format mp3 --audio-quality 0 -o "${filePath}" "${query}"`;
 
-*Title:* ${data.title}
-*Duration:* ${data.timestamp}
-*Uploaded:* ${data.ago}
-*Views:* ${data.views}`;
+        exec(command, async (err, stdout, stderr) => {
+            if (err) {
+                console.log(err);
+                return reply("❌ Failed to download the song!");
+            }
 
-        await conn.sendMessage(from, {
-            image: { url: data.thumbnail },
-            caption: desc
-        }, { quoted: mek });
+            if (!fs.existsSync(filePath)) {
+                return reply("❌ Download failed, file not found!");
+            }
 
-        // 🎧 Download with play-dl → to temp file
-        const stream = await playdl.stream(url, { quality: 2 });
-        const filePath = `./temp_${Date.now()}.mp3`;
+            // send audio to WhatsApp
+            await conn.sendMessage(from, {
+                audio: fs.readFileSync(filePath),
+                mimetype: "audio/mpeg",
+                fileName: fileName
+            }, { quoted: mek });
 
-        await streamPipeline(stream.stream, fs.createWriteStream(filePath));
+            // delete temporary file
+            fs.unlinkSync(filePath);
+        });
 
-        // 🎶 Send audio as buffer
-        const buffer = fs.readFileSync(filePath);
-        await conn.sendMessage(from, {
-            audio: buffer,
-            mimetype: "audio/mpeg",
-            fileName: `${data.title}.mp3`
-        }, { quoted: mek });
-
-        fs.unlinkSync(filePath); // delete temp file
-
-    } catch (e) {
-        console.log(e);
-        reply(`❌ Error: ${e.message}`);
+    } catch (error) {
+        console.log(error);
+        reply(`❌ Error: ${error.message}`);
     }
 });
