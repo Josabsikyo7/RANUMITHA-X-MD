@@ -3,24 +3,24 @@ const config = require('../config');
 const os = require("os");
 const { runtime } = require('../lib/functions');
 
-// Fake ChatGPT vCard
+// Fake META AI vCard
 const fakevCard = {
-    key: {
-        fromMe: false,
-        participant: "0@s.whatsapp.net",
-        remoteJid: "status@broadcast"
-    },
-    message: {
-        contactMessage: {
-            displayName: "© Mr Hiruka",
-            vcard: `BEGIN:VCARD
+  key: {
+    fromMe: false,
+    participant: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast"
+  },
+  message: {
+    contactMessage: {
+      displayName: "AI • Status",
+      vcard: `BEGIN:VCARD
 VERSION:3.0
-FN:Meta
-ORG:META AI;
+FN:AI • Status
+ORG:© Mr Hiruka;
 TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
 END:VCARD`
-        }
     }
+  }
 };
 
 cmd({
