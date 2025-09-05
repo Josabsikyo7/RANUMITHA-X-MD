@@ -12,47 +12,29 @@ cmd({
 },
 async (conn, mek, m, { from, reply }) => {
     try {
-        // ---- First message: Hiruka sequence ----
+        // ---- Hiruka sequence ----
         let hirukaMsg = await conn.sendMessage(from, { text: "Hiruka" }, { quoted: mek });
-
-        const hirukaSteps = [
-            { text: "Hiruka Ranumitha", delay: 1000 },
-            { text: "Hiruka Ranumitha de Silva", delay: 2000 }
-        ];
-
-        for (let step of hirukaSteps) {
-            ((txt, d) => {
-                setTimeout(async () => {
-                    try {
-                        await conn.sendMessage(from, { text: txt, edit: hirukaMsg.key });
-                    } catch (err) {
-                        await conn.sendMessage(from, { text: txt }, { quoted: mek });
-                    }
-                }, d);
-            })(step.text, step.delay);
+        const hirukaSteps = ["Hiruka Ranumitha", "Hiruka Ranumitha de Silva"];
+        for (let i = 0; i < hirukaSteps.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // delay 2s
+            try {
+                await conn.sendMessage(from, { text: hirukaSteps[i], edit: hirukaMsg.key });
+            } catch {
+                await conn.sendMessage(from, { text: hirukaSteps[i] }, { quoted: mek });
+            }
         }
 
-        // ---- Second message: Kasun sequence ----
-        setTimeout(async () => {
-            let kasunMsg = await conn.sendMessage(from, { text: "Kasun" }, { quoted: mek });
-
-            const kasunSteps = [
-                { text: "Kasun Kalhara", delay: 1000 },
-                { text: "Kasun Kalhara de Silva", delay: 2000 }
-            ];
-
-            for (let step of kasunSteps) {
-                ((txt, d) => {
-                    setTimeout(async () => {
-                        try {
-                            await conn.sendMessage(from, { text: txt, edit: kasunMsg.key });
-                        } catch (err) {
-                            await conn.sendMessage(from, { text: txt }, { quoted: mek });
-                        }
-                    }, d);
-                })(step.text, step.delay);
+        // ---- Kasun sequence ----
+        let kasunMsg = await conn.sendMessage(from, { text: "Kasun" }, { quoted: mek });
+        const kasunSteps = ["Kasun Kalhara", "Kasun Kalhara de Silva"];
+        for (let i = 0; i < kasunSteps.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // delay 2s
+            try {
+                await conn.sendMessage(from, { text: kasunSteps[i], edit: kasunMsg.key });
+            } catch {
+                await conn.sendMessage(from, { text: kasunSteps[i] }, { quoted: mek });
             }
-        }, 5000); // start Kasun sequence after Hiruka sequence finishes
+        }
 
     } catch (e) {
         console.error("Error in nameeditseq command:", e);
