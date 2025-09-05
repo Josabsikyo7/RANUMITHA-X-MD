@@ -1,47 +1,56 @@
 const { cmd } = require('../command');
-const fg = require('api-dylux')
-const yts = require('yt-search')
-
+const fg = require('api-dylux');
+const yts = require('yt-search');
 
 cmd({
     pattern: "song",
     alias: ["songs", "ranusong", "asong", "play"],
     react: "🎵",
-    desc: "dowonload songs",
-    category: "dowonload",
+    desc: "Download songs",
+    category: "download",
     filename: __filename
 },
 async (conn, mek, m, {
     from, quoted, reply, body, isCmd, command, args, sender
 }) => {
-    try{
-if(!q) return reply("Please give me url or title/song name")  
-const search = await yts(q)    
-const data = search.video[0];
-const url = data.url
+    try {
+        let q = args.join(" ");
+        if (!q) return reply("❌ Please give me a YouTube URL or a song name!");
 
-let desc = `*RANUMITHA-X-MD SONG DOWONLOADR*
+        const search = await yts(q);
+        const data = search.videos[0];
+        if (!data) return reply("⚠️ Song not found!");
 
-title: ${data.title}
-description: ${data.description}
-time: ${data.timestamp}
-ago: ${data.ago}
-views: ${data.views}
+        const url = data.url;
 
-> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`
+        let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
 
-await conn sendMessage(from.{image:{url: data.thumbnail},caption:desc},{quoted:mek});
-//dowonload audio
+*Title:* ${data.title}
+*Description:* ${data.description || "N/A"}
+*Duration:* ${data.timestamp}
+*Uploaded:* ${data.ago}
+*Views:* ${data.views}
 
-let down = await fg.yta(url)
-let dowonloadUrl = down.dl_url
+> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-//send audio message
-await conn.sendMessage(from,{audio: {url:dowonloadUrl},minetype:"audio/mpeg"},{quoted:mek})
+        // send thumbnail + details
+        await conn.sendMessage(from, {
+            image: { url: data.thumbnail },
+            caption: desc
+        }, { quoted: mek });
 
-    
- }catch(e){
- console.log(e)
- reply(`${e}`)   
- }
- })
+        // download audio
+        let down = await fg.yta(url);
+        let downloadUrl = down.dl_url;
+
+        // send audio
+        await conn.sendMessage(from, {
+            audio: { url: downloadUrl },
+            mimetype: "audio/mpeg"
+        }, { quoted: mek });
+
+    } catch (e) {
+        console.log(e);
+        reply(`❌ Error: ${e.message}`);
+    }
+});
