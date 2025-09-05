@@ -1,8 +1,6 @@
 const { cmd } = require('../command');
 const yts = require('yt-search');
-const youtubedl = require('yt-dlp-exec');
-const fs = require('fs');
-const path = require('path');
+const ytdl = require('ytdl-core');
 
 cmd({
     pattern: "song",
@@ -14,16 +12,18 @@ cmd({
 },
 async (conn, mek, m, { from, quoted, reply, body, isCmd, command, args, sender }) => {
     try {
+        // check user input
         let q = args.join(" ");
         if (!q) return reply("❌ Please give me a YouTube URL or a song name!");
 
-        // search video
+        // search YouTube
         const search = await yts(q);
         const data = search.videos[0];
         if (!data) return reply("⚠️ Song not found!");
 
         const url = data.url;
 
+        // message caption
         let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
 
 *Title:* ${data.title}
@@ -40,24 +40,19 @@ async (conn, mek, m, { from, quoted, reply, body, isCmd, command, args, sender }
             caption: desc
         }, { quoted: mek });
 
-        // download audio using yt-dlp
-        const outputPath = path.join(__dirname, `${data.title}.mp3`.replace(/[\/\\?%*:|"<>]/g, '-'));
-        await youtubedl(url, {
-            extractAudio: true,
-            audioFormat: 'mp3',
-            output: outputPath,
+        // create audio stream (no temp file)
+        const audioStream = ytdl(url, {
+            filter: 'audioonly',
+            quality: 'highestaudio',
+            highWaterMark: 1 << 25
         });
 
-        // send audio
-        const audioBuffer = fs.readFileSync(outputPath);
+        // send audio directly
         await conn.sendMessage(from, {
-            audio: audioBuffer,
+            audio: audioStream,
             mimetype: "audio/mpeg",
             fileName: `${data.title}.mp3`
         }, { quoted: mek });
-
-        // delete temp file
-        fs.unlinkSync(outputPath);
 
     } catch (e) {
         console.log(e);
