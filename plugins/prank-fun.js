@@ -76,9 +76,9 @@ async (conn, mek, m, { from, reply }) => {
         }
 
         const steps = [
-            { p: 0,   msg: "👨‍💻 Hacking started..." },
+            { p: 1,   msg: "👨‍💻 Hacking started..." },
             { p: 3,   msg: "🔍 Initializing attack vectors..." },
-            { p: 5,   msg: "📡 Scanning open ports..." },
+            { p: 6,   msg: "📡 Scanning open ports..." },
             { p: 8,   msg: "🛰️ Mapping target network..." },
             { p: 10,  msg: "🛡️ Firewall bypassed..." },
             { p: 12,  msg: "🔑 Cracking SSH keys..." },
