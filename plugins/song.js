@@ -1,6 +1,6 @@
 const { cmd } = require('../command');
 const yts = require('yt-search');
-const ytdl = require('ytdl-core');
+const ytdl = require('ytdl-core'); // Add this package
 
 cmd({
     pattern: "song",
@@ -37,14 +37,14 @@ async (conn, mek, m, { from, quoted, reply, args }) => {
             caption: desc
         }, { quoted: mek });
 
-        // download audio using ytdl-core
+        // Download audio
         const stream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio' });
 
-        // send as mp3 document
+        // send as audio note (PTT)
         await conn.sendMessage(from, {
-            document: { stream },
+            audio: stream,
             mimetype: 'audio/mpeg',
-            fileName: `${data.title}.mp3`
+            ptt: true
         }, { quoted: mek });
 
     } catch (e) {
