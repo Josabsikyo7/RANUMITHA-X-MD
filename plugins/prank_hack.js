@@ -5,7 +5,7 @@ cmd({
     pattern: "loard",
     alias: ["hackprank", "fakehack"],
     use: '.prankhack',
-    desc: "Prank hacking simulation with loading bar.",
+    desc: "Prank hacking simulation (20-step messages).",
     category: "fun",
     react: "💻",
     filename: __filename
@@ -19,46 +19,35 @@ async (conn, mek, m, { from, reply }) => {
             return `[${'█'.repeat(filled)}${'░'.repeat(empty)}] ${percent}% ⏳`;
         }
 
-        // Hacking phrases to show at certain percentages
-        const phrases = {
-            5: "💻 Initializing hack system...",
-            15: "🔍 Scanning open ports...",
-            25: "🛡️ Firewall bypassed...",
-            35: "📂 Accessing database...",
-            50: "💾 Dumping data...",
-            65: "📡 Uploading to control server...",
-            75: "⚡ Power override engaged...",
-            85: "🧹 Cleaning traces...",
-            95: "🚨 Finalizing exploit...",
-            100: "✅ HACKING COMPLETE — TARGET COMPROMISED!"
-        };
+        const steps = [
+            { p: 0,   msg: "💻 Hacking started..." },
+            { p: 5,   msg: "🔍 Scanning open ports..." },
+            { p: 10,  msg: "🛡️ Firewall bypassed..." },
+            { p: 15,  msg: "🌐 Connecting to server..." },
+            { p: 20,  msg: "📂 Accessing database..." },
+            { p: 30,  msg: "💾 Dumping data..." },
+            { p: 40,  msg: "📡 Uploading payload..." },
+            { p: 50,  msg: "⚡ Privilege escalation..." },
+            { p: 60,  msg: "🖥️ Root access granted..." },
+            { p: 70,  msg: "🔒 Encrypting channels..." },
+            { p: 80,  msg: "🧹 Cleaning traces..." },
+            { p: 90,  msg: "🚨 Finalizing exploit..." },
+            { p: 100, msg: "✅ HACKING COMPLETE — TARGET COMPROMISED!" }
+        ];
 
-        // Initial bar
-        let sentMsg = await conn.sendMessage(from, { text: makeBar(0) }, { quoted: mek });
+        const baseDelay = 1000; // ms between messages
 
-        const totalSteps = 100;   // 1% to 100
-        const delay = 300;        // ms per step
-
-        for (let i = 1; i <= totalSteps; i++) {
-            ((p) => {
+        for (let i = 0; i < steps.length; i++) {
+            ((step, delay) => {
                 setTimeout(async () => {
                     try {
-                        let text = makeBar(p);
-                        if (phrases[p]) {
-                            text = phrases[p] + "\n" + text; // attach phrase with bar
-                        }
-
-                        // Try to edit the same message
-                        await conn.sendMessage(from, {
-                            text,
-                            edit: sentMsg.key
-                        });
+                        const text = `${step.msg}\n${makeBar(step.p)}`;
+                        await conn.sendMessage(from, { text }, { quoted: mek });
                     } catch (err) {
-                        // fallback: send as new message if edit unsupported
-                        await conn.sendMessage(from, { text: makeBar(p) }, { quoted: mek });
+                        console.error("Send error:", err);
                     }
-                }, p * delay);
-            })(i);
+                }, delay);
+            })(steps[i], i * baseDelay);
         }
 
     } catch (e) {
