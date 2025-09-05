@@ -1,6 +1,7 @@
 const { cmd } = require('../command');
 const fg = require('api-dylux');
 const yts = require('yt-search');
+const ytdl = require('@distube/ytdl-core');  // fallback
 
 cmd({
     pattern: "song",
@@ -40,13 +41,24 @@ async (conn, mek, m, {
             caption: desc
         }, { quoted: mek });
 
-        // download audio
-        let down = await fg.yta(url).catch(() => null);
-        if (!down || !down.dl_url) {
-            return reply("⚠️ Failed to download audio!");
+        // Try api-dylux first
+        let downloadUrl;
+        try {
+            let down = await fg.yta(url);
+            downloadUrl = down.dl_url;
+        } catch (err) {
+            downloadUrl = null;
         }
 
-        let downloadUrl = down.dl_url;
+        // If api-dylux failed → use ytdl-core
+        if (!downloadUrl) {
+            const info = await ytdl.getInfo(url);
+            const format = ytdl.chooseFormat(info.formats, { filter: 'audioonly', quality: 'highestaudio' });
+            if (!format || !format.url) {
+                return reply("⚠️ Failed to download audio from YouTube!");
+            }
+            downloadUrl = format.url;
+        }
 
         // send audio
         await conn.sendMessage(from, {
