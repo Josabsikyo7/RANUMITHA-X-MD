@@ -1,9 +1,6 @@
 const { cmd } = require('../command');
 const yts = require('yt-search');
-const ytdl = require('ytdl-core');
-const stream = require('stream');
-const { promisify } = require('util');
-const bufferStream = promisify(stream.pipeline);
+const axios = require('axios');
 
 cmd({
     pattern: "song",
@@ -18,45 +15,44 @@ async (conn, mek, m, { from, quoted, reply, args }) => {
         let q = args.join(" ");
         if (!q) return reply("❌ Please give me a YouTube URL or song name!");
 
-        const search = await yts(q);
-        const data = search.videos[0];
-        if (!data) return reply("⚠️ Song not found!");
+        let url = q;
 
-        const url = data.url;
+        // If user gave a song name instead of URL
+        if (!q.startsWith("http")) {
+            const search = await yts(q);
+            const video = search.videos[0];
+            if (!video) return reply("⚠️ Song not found!");
+            url = video.url;
 
-        let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
+            // Send video info
+            let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
 
-*Title:* ${data.title}
-*Duration:* ${data.timestamp}
-*Uploaded:* ${data.ago}
-*Views:* ${data.views}
+*Title:* ${video.title}
+*Duration:* ${video.timestamp}
+*Uploaded:* ${video.ago}
+*Views:* ${video.views}
 *URL:* ${url}
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-        // send thumbnail + details
+            await conn.sendMessage(from, {
+                image: { url: video.thumbnail },
+                caption: desc
+            }, { quoted: mek });
+        }
+
+        // Send URL to dcm-ytmp3-downloder API
+        const apiUrl = `https://dcm-ytmp3-downloder.vercel.app/api?url=${encodeURIComponent(url)}`;
+        const res = await axios.get(apiUrl);
+        const data = res.data;
+
+        if (!data || !data.audio) return reply("⚠️ Failed to convert audio!");
+
+        // Send the audio to user
         await conn.sendMessage(from, {
-            image: { url: data.thumbnail },
-            caption: desc
-        }, { quoted: mek });
-
-        // Download audio as buffer
-        const audioStream = ytdl(url, { filter: 'audioonly', quality: 'highestaudio' });
-        const chunks = [];
-        audioStream.on('data', chunk => chunks.push(chunk));
-
-        await new Promise((resolve, reject) => {
-            audioStream.on('end', resolve);
-            audioStream.on('error', reject);
-        });
-
-        const audioBuffer = Buffer.concat(chunks);
-
-        // send as audio (PTT)
-        await conn.sendMessage(from, {
-            audio: audioBuffer,
+            audio: { url: data.audio },
             mimetype: 'audio/mpeg',
-            ptt: true
+            ptt: true // Change to false if you want normal MP3
         }, { quoted: mek });
 
     } catch (e) {
