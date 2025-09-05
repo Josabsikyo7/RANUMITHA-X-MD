@@ -18,15 +18,16 @@ async (conn, mek, m, {
         if (!q) return reply("❌ Please give me a YouTube URL or a song name!");
 
         const search = await yts(q);
-        const data = search.videos[0];
-        if (!data) return reply("⚠️ Song not found!");
+        if (!search || !search.videos || search.videos.length === 0) {
+            return reply("⚠️ No results found for your query!");
+        }
 
+        const data = search.videos[0];
         const url = data.url;
 
         let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
 
 *Title:* ${data.title}
-*Description:* ${data.description || "N/A"}
 *Duration:* ${data.timestamp}
 *Uploaded:* ${data.ago}
 *Views:* ${data.views}
@@ -40,7 +41,11 @@ async (conn, mek, m, {
         }, { quoted: mek });
 
         // download audio
-        let down = await fg.yta(url);
+        let down = await fg.yta(url).catch(() => null);
+        if (!down || !down.dl_url) {
+            return reply("⚠️ Failed to download audio!");
+        }
+
         let downloadUrl = down.dl_url;
 
         // send audio
