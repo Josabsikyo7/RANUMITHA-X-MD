@@ -1,6 +1,5 @@
 const { cmd } = require('../command');
 const yts = require('yt-search');
-const ytdl = require('ytdl-core');
 
 cmd({
     pattern: "song",
@@ -10,20 +9,19 @@ cmd({
     category: "download",
     filename: __filename
 },
-async (conn, mek, m, { from, quoted, reply, body, isCmd, command, args, sender }) => {
+async (conn, mek, m, {
+    from, quoted, reply, body, isCmd, command, args, sender
+}) => {
     try {
-        // check user input
         let q = args.join(" ");
         if (!q) return reply("❌ Please give me a YouTube URL or a song name!");
 
-        // search YouTube
         const search = await yts(q);
         const data = search.videos[0];
         if (!data) return reply("⚠️ Song not found!");
 
         const url = data.url;
 
-        // message caption
         let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
 
 *Title:* ${data.title}
@@ -31,6 +29,7 @@ async (conn, mek, m, { from, quoted, reply, body, isCmd, command, args, sender }
 *Duration:* ${data.timestamp}
 *Uploaded:* ${data.ago}
 *Views:* ${data.views}
+*URL:* ${url}
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
@@ -40,18 +39,16 @@ async (conn, mek, m, { from, quoted, reply, body, isCmd, command, args, sender }
             caption: desc
         }, { quoted: mek });
 
-        // create audio stream (no temp file)
-        const audioStream = ytdl(url, {
-            filter: 'audioonly',
-            quality: 'highestaudio',
-            highWaterMark: 1 << 25
-        });
+        // download audio
+        let down = await fg.yta(url);
+        let downloadUrl = down.dl_url;
 
-        // send audio directly
+        // send audio with url in caption
         await conn.sendMessage(from, {
-            audio: audioStream,
+            audio: { url: downloadUrl },
             mimetype: "audio/mpeg",
-            fileName: `${data.title}.mp3`
+            ptt: false, // voice message nemei normal audio
+            caption: `🎶 *${data.title}*\n\n🔗 ${url}`
         }, { quoted: mek });
 
     } catch (e) {
