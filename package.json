@@ -55,6 +55,7 @@
     "@mrnima/facebook-downloader":"^1.0.0",
     "@iamtraction/google-translate":"^2.0.1",
     "mrnima-moviedl":"^1.0.0",
-    "sadaslk-dlcore":"1.0.0"
+    "sadaslk-dlcore":"^1.0.0",
+    "ytdl-core":"^11.6.0"
   }
 }
