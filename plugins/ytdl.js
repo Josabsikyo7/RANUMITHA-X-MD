@@ -64,8 +64,8 @@ cmd({
             `🔽 *Reply with your choice:*\n` +
             `1. *Audio Type* 🎵\n` +
             `2. *Document Type* 📁\n` +
-            `3. *Voice Note Type* 🎙️\n\n` +   // 👈 new option
-            `${config.FOOTER || "𓆩RANUMITHA-X-MD𓆪"}`;
+            `3. *Voice Note Type* 🎤\n\n` +   // 👈 new option
+            `${config.FOOTER || "> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛"}`;
 
         const sentMsg = await conn.sendMessage(from, { image: { url: image }, caption: info }, { quoted: fakevCard });
         const messageID = sentMsg.key.id;
