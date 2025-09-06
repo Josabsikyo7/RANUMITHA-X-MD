@@ -1,53 +1,67 @@
-const config = require('../config');
-const { cmd } = require('../command');
-const yts = require('yt-search');
+const { cmd } = require("../command");
+const fetch = require("node-fetch");
 
 cmd({
-    pattern: "song",
-    alias: ["play2", "music"],
-    react: "🎵",
-    desc: "Download audio from YouTube",
-    category: "download",
-    use: ".song <query or url>",
-    filename: __filename
-}, async (conn, m, mek, { from, q, reply }) => {
-    try {
-        if (!q) return await reply("❌ Please provide a song name or YouTube URL!");
+  pattern: "song",
+  alias: ["play", "mp3"],
+  react: "🎶",
+  desc: "Download YouTube song (Audio) via izumiii API",
+  category: "download",
+  use: ".song <query>",
+  filename: __filename
+}, async (conn, mek, m, { from, reply, q }) => {
+  try {
+    if (!q) return reply("⚠️ Please provide a song name or YouTube link.");
 
-        let videoUrl, title;
-        
-        // Check if it's a URL
-        if (q.match(/(youtube\.com|youtu\.be)/)) {
-            videoUrl = q;
-            const videoInfo = await yts({ videoId: q.split(/[=/]/).pop() });
-            title = videoInfo.title;
-        } else {
-            // Search YouTube
-            const search = await yts(q);
-            if (!search.videos.length) return await reply("❌ No results found!");
-            videoUrl = search.videos[0].url;
-            title = search.videos[0].title;
-        }
+    const apiUrl = `https://izumiiiiiiii.dpdns.org/downloader/play?query=${encodeURIComponent(q)}`;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
 
-        await reply("⏳ Downloading audio...");
-
-        // Use API to get audio
-        const apiUrl = `https://api.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(videoUrl)}`;
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-
-        if (!data.success) return await reply("❌ Failed to download audio!");
-
-        await conn.sendMessage(from, {
-            audio: { url: data.result.download_url },
-            mimetype: 'audio/mpeg',
-            ptt: false
-        }, { quoted: mek });
-
-        await reply(`✅ *${title}* downloaded successfully!`);
-
-    } catch (error) {
-        console.error(error);
-        await reply(`❌ Error: ${error.message}`);
+    if (!data?.status || !data?.result?.downloads) {
+      return reply("❌ Song not found or API error. Try again later.");
     }
+
+    const meta = data.result.metadata;
+    const downloadUrl = data.result.downloads;
+
+    // 🔹 Fetch thumbnail
+    let buffer;
+    try {
+      const thumbRes = await fetch(meta.thumbnail || meta.image);
+      buffer = Buffer.from(await thumbRes.arrayBuffer());
+    } catch {
+      buffer = null;
+    }
+
+    // 🔹 Styled caption with emojis + spacing
+    const caption = `
+🎶 *Now Playing* 🎶
+
+🎵 *Title:* ${meta.title}
+👤 *Artist:* ${meta?.author?.name || "Unknown"}
+⏱ *Duration:* ${meta?.timestamp || "N/A"}
+👁 *Views:* ${meta?.views?.toLocaleString() || "N/A"}
+
+🔗 [Watch on YouTube](${meta.url})
+
+> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+
+    // 🔹 Send details card (thumbnail + styled caption)
+    await conn.sendMessage(from, {
+      image: buffer,
+      caption: caption,
+      jpegThumbnail: buffer // optional, WhatsApp will use main image
+    }, { quoted: mek });
+
+    // 🔹 Then auto-send the audio
+    await conn.sendMessage(from, {
+      audio: { url: downloadUrl },
+      mimetype: "audio/mpeg",
+      fileName: `${meta.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 80)}.mp3`
+    }, { quoted: mek });
+
+  } catch (err) {
+    console.error("song cmd error:", err);
+    reply("⚠️ An error occurred while processing your request.");
+  }
 });
