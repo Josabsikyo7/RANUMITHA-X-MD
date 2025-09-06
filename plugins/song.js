@@ -1,6 +1,26 @@
 const { cmd } = require("../command");
 const fetch = require("node-fetch");
 
+// Fake vCard (status sender)
+const fakevCard = {
+  key: {
+    fromMe: false,
+    participant: "0@s.whatsapp.net",
+    remoteJid: "status@broadcast"
+  },
+  message: {
+    contactMessage: {
+      displayName: "© Ranumitha-X",
+      vcard: `BEGIN:VCARD
+VERSION:3.0
+FN:Meta
+ORG:META AI;
+TEL;type=CELL;type=VOICE;waid=13135550002:+13135550002
+END:VCARD`
+    }
+  }
+};
+
 cmd({
   pattern: "song",
   alias: ["play", "mp3"],
@@ -33,7 +53,7 @@ cmd({
       buffer = null;
     }
 
-    // 🔹 Styled caption with emojis + spacing
+    // 🔹 Caption text first
     const caption = `
 🎶 *Now Playing* 🎶
 
@@ -44,21 +64,71 @@ cmd({
 
 🔗 [Watch on YouTube](${meta.url})
 
-> © Powerd by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+🔽 *Reply with your choice:*
+1. *Audio Type* 🎵
+2. *Document Type* 📁
+3. *Voice Note Type* 🎤
 
-    // 🔹 Send details card (thumbnail + styled caption)
-    await conn.sendMessage(from, {
+> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
+
+    // Send caption first (without image)
+    await conn.sendMessage(from, { text: caption }, { quoted: fakevCard });
+
+    // Then send image separately
+    const sentMsg = await conn.sendMessage(from, {
       image: buffer,
-      caption: caption,
-      jpegThumbnail: buffer // optional, WhatsApp will use main image
-    }, { quoted: mek });
+      caption: "🎶 *Song Preview Thumbnail* 🎶"
+    }, { quoted: fakevCard });
 
-    // 🔹 Then auto-send the audio
-    await conn.sendMessage(from, {
-      audio: { url: downloadUrl },
-      mimetype: "audio/mpeg",
-      fileName: `${meta.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 80)}.mp3`
-    }, { quoted: mek });
+    const messageID = sentMsg.key.id;
+
+    // 🔹 Listen for reply
+    conn.ev.on("messages.upsert", async (msgUpdate) => {
+      try {
+        const mekInfo = msgUpdate?.messages[0];
+        if (!mekInfo?.message) return;
+
+        const userText = mekInfo?.message?.conversation || mekInfo?.message?.extendedTextMessage?.text;
+        const isReply = mekInfo?.message?.extendedTextMessage?.contextInfo?.stanzaId === messageID;
+        if (!isReply) return;
+
+        let choice = userText.trim();
+        let type;
+
+        // Show processing message
+        const processingMsg = await conn.sendMessage(from, { text: "⏳ Processing your request..." }, { quoted: fakevCard });
+
+        if (choice === "1") {
+          type = {
+            audio: { url: downloadUrl },
+            mimetype: "audio/mpeg",
+            fileName: `${meta.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 80)}.mp3`
+          };
+        } else if (choice === "2") {
+          type = {
+            document: { url: downloadUrl },
+            mimetype: "audio/mpeg",
+            fileName: `${meta.title.replace(/[\\/:*?"<>|]/g, "").slice(0, 80)}.mp3`,
+            caption: meta.title
+          };
+        } else if (choice === "3") {
+          type = {
+            audio: { url: downloadUrl },
+            mimetype: "audio/mpeg",
+            ptt: true // 👈 makes it voice note
+          };
+        } else {
+          return reply("❌ Invalid choice! Reply with 1, 2 or 3.");
+        }
+
+        await conn.sendMessage(from, type, { quoted: mek });
+        await conn.sendMessage(from, { text: "✅ Media Upload Successful.", edit: processingMsg.key });
+
+      } catch (err) {
+        console.error("reply handler error:", err);
+        reply("⚠️ Error while processing your choice.");
+      }
+    });
 
   } catch (err) {
     console.error("song cmd error:", err);
