@@ -30,8 +30,8 @@ END:VCARD`
 };
 
 cmd({
-    pattern: "play1",
-    alias: ["mp3", "ytmp3", "song1"],
+    pattern: "song1",
+    alias: ["song2", "play1", "song1"],
     react: "🎵",
     desc: "Download Ytmp3",
     category: "download",
@@ -63,7 +63,8 @@ cmd({
             `🖇 *Url:* ${url || "Unknown"}\n\n` +
             `🔽 *Reply with your choice:*\n` +
             `1. *Audio Type* 🎵\n` +
-            `2. *Document Type* 📁\n\n` +
+            `2. *Document Type* 📁\n` +
+            `3. *Voice Note Type* 🎙️\n\n` +   // 👈 new option
             `${config.FOOTER || "𓆩RANUMITHA-X-MD𓆪"}`;
 
         const sentMsg = await conn.sendMessage(from, { image: { url: image }, caption: info }, { quoted: fakevCard });
@@ -100,8 +101,15 @@ cmd({
                     if (!downloadUrl) return await reply("❌ Download link not found!");
                     type = { document: { url: downloadUrl }, fileName: `${title}.mp3`, mimetype: "audio/mpeg", caption: title };
                     
+                } else if (userReply === "3") {   // 👈 voice note option
+                    msg = await conn.sendMessage(from, { text: "⏳ Processing..." }, { quoted: fakevCard });
+                    const response = await dy_scrap.ytmp3(`https://youtube.com/watch?v=${id}`);
+                    let downloadUrl = response?.result?.download?.url;
+                    if (!downloadUrl) return await reply("❌ Download link not found!");
+                    type = { audio: { url: downloadUrl }, mimetype: "audio/mpeg", ptt: true };
+                    
                 } else { 
-                    return await reply("❌ Invalid choice! Reply with 1 or 2.");
+                    return await reply("❌ Invalid choice! Reply with 1, 2 or 3.");
                 }
 
                 await conn.sendMessage(from, type, { quoted: mek });
@@ -119,4 +127,3 @@ cmd({
         await reply(`❌ *An error occurred:* ${error.message || "Error!"}`);
     }
 });
-                               
