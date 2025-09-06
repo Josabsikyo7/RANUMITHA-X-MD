@@ -90,8 +90,8 @@ cmd({
         let choice = userText.trim();
         let type;
 
-        // Show processing message
-        const processingMsg = await conn.sendMessage(from, { text: "⏳ Processing your request..." }, { quoted: fakevCard });
+        // ⬇️ React karanna reply ekata
+        await conn.sendMessage(from, { react: { text: "⬇️", key: mekInfo.key } });
 
         if (choice === "1") {
           type = {
@@ -116,8 +116,11 @@ cmd({
           return reply("❌ Invalid choice! Reply with 1, 2 or 3.");
         }
 
-        await conn.sendMessage(from, type, { quoted: mek });
-        await conn.sendMessage(from, { text: "✅ Media Upload Successful.", edit: processingMsg.key });
+        // Send media
+        const sentMedia = await conn.sendMessage(from, type, { quoted: mek });
+
+        // ✅ React karanna media msg ekata
+        await conn.sendMessage(from, { react: { text: "✅", key: sentMedia.key } });
 
       } catch (err) {
         console.error("reply handler error:", err);
