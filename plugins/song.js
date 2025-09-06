@@ -10,7 +10,7 @@ const fakevCard = {
   },
   message: {
     contactMessage: {
-      displayName: "© Ranumitha-X",
+      displayName: "© Mr Hiruka",
       vcard: `BEGIN:VCARD
 VERSION:3.0
 FN:Meta
@@ -54,20 +54,18 @@ cmd({
     }
 
     // 🔹 Styled caption + options
-    const caption = `
-🎶 *Now Playing* 🎶
+    const caption = `🎶 *RANUMITHA-X-MD SONG DOWONLOADER* 🎶
 
 🎵 *Title:* ${meta.title}
 👤 *Artist:* ${meta?.author?.name || "Unknown"}
 ⏱ *Duration:* ${meta?.timestamp || "N/A"}
 👁 *Views:* ${meta?.views?.toLocaleString() || "N/A"}
-
-🔗 [Watch on YouTube](${meta.url})
+🔗 *Url:* ${meta.url}
 
 🔽 *Reply with your choice:*
 1. *Audio Type* 🎵
 2. *Document Type* 📁
-3. *Voice Note Type* 🎙️
+3. *Voice Note Type* 🎤
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
