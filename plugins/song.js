@@ -53,7 +53,7 @@ cmd({
       buffer = null;
     }
 
-    // 🔹 Caption text first
+    // 🔹 Styled caption + options
     const caption = `
 🎶 *Now Playing* 🎶
 
@@ -67,17 +67,14 @@ cmd({
 🔽 *Reply with your choice:*
 1. *Audio Type* 🎵
 2. *Document Type* 📁
-3. *Voice Note Type* 🎤
+3. *Voice Note Type* 🎙️
 
 > © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
 
-    // Send caption first (without image)
-    await conn.sendMessage(from, { text: caption }, { quoted: fakevCard });
-
-    // Then send image separately
+    // Send image + caption ekama message ekaka
     const sentMsg = await conn.sendMessage(from, {
       image: buffer,
-      caption: "🎶 *Song Preview Thumbnail* 🎶"
+      caption: caption
     }, { quoted: fakevCard });
 
     const messageID = sentMsg.key.id;
