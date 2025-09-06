@@ -1,62 +1,53 @@
+const config = require('../config');
 const { cmd } = require('../command');
 const yts = require('yt-search');
-const axios = require('axios');
 
 cmd({
     pattern: "song",
-    alias: ["songs", "ranusong", "asong", "play"],
+    alias: ["play2", "music"],
     react: "🎵",
-    desc: "Download songs",
+    desc: "Download audio from YouTube",
     category: "download",
+    use: ".song <query or url>",
     filename: __filename
-},
-async (conn, mek, m, { from, quoted, reply, args }) => {
+}, async (conn, m, mek, { from, q, reply }) => {
     try {
-        let q = args.join(" ");
-        if (!q) return reply("❌ Please give me a YouTube URL or song name!");
+        if (!q) return await reply("❌ Please provide a song name or YouTube URL!");
 
-        let url = q;
-
-        // If user gave a song name instead of URL
-        if (!q.startsWith("http")) {
+        let videoUrl, title;
+        
+        // Check if it's a URL
+        if (q.match(/(youtube\.com|youtu\.be)/)) {
+            videoUrl = q;
+            const videoInfo = await yts({ videoId: q.split(/[=/]/).pop() });
+            title = videoInfo.title;
+        } else {
+            // Search YouTube
             const search = await yts(q);
-            const video = search.videos[0];
-            if (!video) return reply("⚠️ Song not found!");
-            url = video.url;
-
-            // Send video info
-            let desc = `*🎵 RANUMITHA-X-MD SONG DOWNLOADER 🎵*
-
-*Title:* ${video.title}
-*Duration:* ${video.timestamp}
-*Uploaded:* ${video.ago}
-*Views:* ${video.views}
-*URL:* ${url}
-
-> © Powered by 𝗥𝗔𝗡𝗨𝗠𝗜𝗧𝗛𝗔-𝗫-𝗠𝗗 🌛`;
-
-            await conn.sendMessage(from, {
-                image: { url: video.thumbnail },
-                caption: desc
-            }, { quoted: mek });
+            if (!search.videos.length) return await reply("❌ No results found!");
+            videoUrl = search.videos[0].url;
+            title = search.videos[0].title;
         }
 
-        // Send URL to dcm-ytmp3-downloder API
-        const apiUrl = `https://dcm-ytmp3-downloder.vercel.app/api?url=${encodeURIComponent(url)}`;
-        const res = await axios.get(apiUrl);
-        const data = res.data;
+        await reply("⏳ Downloading audio...");
 
-        if (!data || !data.audio) return reply("⚠️ Failed to convert audio!");
+        // Use API to get audio
+        const apiUrl = `https://api.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(videoUrl)}`;
+        const response = await fetch(apiUrl);
+        const data = await response.json();
 
-        // Send the audio to user
+        if (!data.success) return await reply("❌ Failed to download audio!");
+
         await conn.sendMessage(from, {
-            audio: { url: data.audio },
+            audio: { url: data.result.download_url },
             mimetype: 'audio/mpeg',
-            ptt: true // Change to false if you want normal MP3
+            ptt: false
         }, { quoted: mek });
 
-    } catch (e) {
-        console.error(e);
-        reply("⚠️ Failed to download audio!");
+        await reply(`✅ *${title}* downloaded successfully!`);
+
+    } catch (error) {
+        console.error(error);
+        await reply(`❌ Error: ${error.message}`);
     }
 });
